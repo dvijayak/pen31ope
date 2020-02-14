@@ -11,7 +11,7 @@ add_executable(3dlib
     Common/Chrono.cpp
     Core/SDLRenderer.cpp
 )
-target_link_libraries(3dlib ${SDL2_LIBRARIES})
+target_link_libraries(3dlib ${SDL2_LIBS})
 
 # Copy SDL2 DLLs to output folder on Windows
 # Thanks to https://github.com/preshing/CMakeDemo/blob/master/CMakeLists.txt#L21

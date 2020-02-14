@@ -5,7 +5,7 @@
 #include <utility> // for std::pair
 #include <vector>
 
-#include "IRenderer.hpp";
+#include "IRenderer.hpp"
 
 class Game
 {

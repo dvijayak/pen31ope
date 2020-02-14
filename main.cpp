@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#define SDL_MAIN_HANDLED
+
 #include "SDLRenderer.hpp"
 #include "Game.hpp"
 #include "Logger.hpp"
@@ -11,8 +13,9 @@ const uint16_t HEIGHT = 768;
 
 int main (int argc, char** argv)
 {
-    INITIALIZE_BASIC_LOGGERS(4096);
+    INITIALIZE_BASIC_LOGGERS();
 
+    SDL_SetMainReady();
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII
     pSDL->Initialize("3D Library (TOBENAMED)", WIDTH, HEIGHT);
 
