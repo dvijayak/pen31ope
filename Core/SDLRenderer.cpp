@@ -65,7 +65,7 @@ SDLRenderer::~SDLRenderer ()
 
 void SDLRenderer::RenderFrame () const
 {
-    SDL_UpdateTexture(m_pTexture, 0, m_pixels.data(), m_WIDTH * sizeof(Uint32));
+    SDL_UpdateTexture(m_pTexture, 0, m_pixels.data(), m_WIDTH * sizeof(ColorRGB));
 
     SDL_RenderClear(m_pRenderer);
     SDL_RenderCopy(m_pRenderer, m_pTexture, 0, 0);
