@@ -13,8 +13,9 @@ add_executable(3dlib
     main.cpp
     Game.cpp
     Common/Chrono.cpp
+    Core/IRenderer.cpp
     Core/SDLRenderer.cpp
-)
+    )
 target_link_libraries(3dlib ${SDL2_LIBS})
 
 # Copy SDL2 DLLs to output folder on Windows

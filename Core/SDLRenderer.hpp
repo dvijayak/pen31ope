@@ -41,7 +41,7 @@ private:
     SDL_Window* m_pWindow = 0;
 
 	// We possess ownership of screen pixels, screen texture and screen renderer
-	std::vector<ColorRGB> m_pixels; // TODO: Change this to ColorRGB array?
+	std::vector<ColorRGB> m_pixels;
 	SDL_Renderer* m_pRenderer = 0;
 	SDL_Texture* m_pTexture = 0;
 };

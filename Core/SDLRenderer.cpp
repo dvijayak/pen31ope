@@ -75,8 +75,6 @@ void SDLRenderer::RenderFrame () const
 
 void SDLRenderer::FillScreenBackground (ColorRGB color)
 {
-    // memset(m_pixels, int(color), m_WIDTH * sizeof(ColorRGB));
-
     for (size_t w = 0; w < m_WIDTH; ++w)
     {
         for (size_t h = 0; h < m_HEIGHT; ++h)

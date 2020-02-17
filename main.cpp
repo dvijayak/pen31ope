@@ -8,8 +8,8 @@
 #include "Game.hpp"
 #include "Logger.hpp"
 
-const uint16_t WIDTH = 1024;
-const uint16_t HEIGHT = 768;
+uint16_t const WIDTH = 320;
+uint16_t const HEIGHT = 240;
 
 int main (int argc, char** argv)
 {

@@ -116,12 +116,14 @@ bool Game::ProcessEvents ()
 
 void Game::DrawWorld (float dt)
 {
-    // TODO: Use the normalized lag dt to produce a more accurate render
+    // TODO: Use the normalized lag dt to produce a more accurate render    
 
-    // m_pRenderer->FillScreenBackground(Color::Mix(float(TEST++ & 0xfF)/float(0xFF), 1.f, 1.f));
-    m_pRenderer->FillScreenBackground(Color::Orange);
-
-    // Final step - send the frame buffer to the video device
-    // TODO: should reword comment
+    m_pRenderer->DrawLine(20, 13, 40, 80, Color::Red); 
+    m_pRenderer->DrawLine(10, 150, 100, 20, Color::Cyan);
+    m_pRenderer->DrawLine(13, 20, 80, 40, Color::Green); 
+    m_pRenderer->DrawLine(10, 150, 100, 130, Color::Purple);
+    m_pRenderer->DrawLine(50, 150, 50, 20, Color::Yellow);    
+    m_pRenderer->DrawLine(50, 100, 100, 100, Color::Yellow);    
+    
     m_pRenderer->RenderFrame();
 }
