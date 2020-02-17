@@ -19,7 +19,6 @@ public:
     void Initialize (std::string windowTitle, size_t width, size_t height);
 
     /// Helpers
-	void FillScreenBackground (ColorRGB color=Color::Black);
 
     // TODO: Redraw
 	/// All draw functions expect normalized device coordinates of range [0, 1]
@@ -31,6 +30,7 @@ public:
     /// IRenderer
 	void SetPixel (size_t index, ColorRGB color=Color::Black);
 	void SetPixel (size_t x, size_t y, ColorRGB color=Color::Black);
+	void FillScreenBackground (ColorRGB color=Color::Black);
 	void RenderFrame () const;
 
 private:

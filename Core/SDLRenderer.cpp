@@ -32,10 +32,11 @@ void SDLRenderer::Initialize (std::string windowTitle, size_t width, size_t heig
 
     // Main Texture
     m_pTexture = SDL_CreateTexture(m_pRenderer, 
-        SDL_PIXELFORMAT_RGB888,
+        SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STATIC,
         m_WIDTH, m_HEIGHT
         );
+    SDL_SetTextureBlendMode(m_pTexture, SDL_BLENDMODE_NONE); // no alpha blending - we will implement this ourselves; this effectively ignores the value of the alpha channel in the pixel color
 
     // Raw buffer
     m_pixels = std::vector<ColorRGB>(m_WIDTH * m_HEIGHT);
@@ -74,6 +75,8 @@ void SDLRenderer::RenderFrame () const
 
 void SDLRenderer::FillScreenBackground (ColorRGB color)
 {
+    // memset(m_pixels, int(color), m_WIDTH * sizeof(ColorRGB));
+
     for (size_t w = 0; w < m_WIDTH; ++w)
     {
         for (size_t h = 0; h < m_HEIGHT; ++h)

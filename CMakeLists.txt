@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.7)
 project(3dlib)
 
+set (CMAKE_CXX_STANDARD 14)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeMods/")
 find_package(SDL2 REQUIRED)
+
+message("${SDL2} ${SDL2_INCLUDE_DIRS} ${SDL2_LIBS}")
 
 include_directories(${SDL2_INCLUDE_DIRS} "3rdParty" "Common" "Core")
 add_executable(3dlib

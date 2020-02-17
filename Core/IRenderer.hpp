@@ -10,6 +10,7 @@ public:
 
     virtual void SetPixel (size_t index, ColorRGB color) = 0;
 	virtual void SetPixel (size_t x, size_t y, ColorRGB color) = 0;
+    virtual void FillScreenBackground (ColorRGB color=Color::Black) = 0;
 
 	virtual void RenderFrame () const = 0;
 };

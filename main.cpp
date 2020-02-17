@@ -13,7 +13,7 @@ const uint16_t HEIGHT = 768;
 
 int main (int argc, char** argv)
 {
-    INITIALIZE_BASIC_LOGGERS();
+    // INITIALIZE_BASIC_LOGGERS();
 
     SDL_SetMainReady();
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII
@@ -35,7 +35,7 @@ int main (int argc, char** argv)
         rc = game.Run();
     }
 
-    spdlog::drop_all(); 	// in Windows, this must be called before main finishes to workaround a known VS issue
+    // spdlog::drop_all(); 	// in Windows, this must be called before main finishes to workaround a known VS issue
 
     return rc;
 }

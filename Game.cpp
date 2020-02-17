@@ -12,6 +12,8 @@
 constexpr size_t MAX_FPS = 240;
 constexpr size_t MIN_FPS = 15;
 
+static int TEST = 0;
+
 Game::Game ()
     : m_targetFrameRate(60)
     , m_fixedUpdateTimeStep(1000/m_targetFrameRate)
@@ -115,6 +117,9 @@ bool Game::ProcessEvents ()
 void Game::DrawWorld (float dt)
 {
     // TODO: Use the normalized lag dt to produce a more accurate render
+
+    // m_pRenderer->FillScreenBackground(Color::Mix(float(TEST++ & 0xfF)/float(0xFF), 1.f, 1.f));
+    m_pRenderer->FillScreenBackground(Color::Orange);
 
     // Final step - send the frame buffer to the video device
     // TODO: should reword comment

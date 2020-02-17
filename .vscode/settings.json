@@ -6,6 +6,9 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "build": true,
-        "3rdParty": true
+        "3rdParty": false
+    },
+    "files.associations": {
+        "memory": "cpp"
     }
 }
