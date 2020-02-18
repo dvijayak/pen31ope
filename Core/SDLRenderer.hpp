@@ -16,7 +16,7 @@ public:
 	SDLRenderer ();
 	virtual ~SDLRenderer ();
 
-    void Initialize (std::string windowTitle, size_t width, size_t height);
+    void Initialize (std::string windowTitle, uint width, uint height);
 
     /// Helpers
 
@@ -28,14 +28,14 @@ public:
 	// void DrawPolygon (const PolygonF& poly, Uint32 color=Color::White);
 
     /// IRenderer
-	void SetPixel (size_t index, ColorRGB color=Color::Black);
-	void SetPixel (size_t x, size_t y, ColorRGB color=Color::Black);
+	void SetPixel (uint index, ColorRGB color=Color::Black);
+	void SetPixel (uint x, uint y, ColorRGB color=Color::Black);
 	void FillScreenBackground (ColorRGB color=Color::Black);
-	void RenderFrame () const;
+	void RenderFrame ();
 
 private:
-	size_t m_WIDTH;
-	size_t m_HEIGHT;
+	uint m_WIDTH;
+	uint m_HEIGHT;
 
     // TODO: Convert all to unique ptr
     SDL_Window* m_pWindow = 0;
@@ -46,14 +46,14 @@ private:
 	SDL_Texture* m_pTexture = 0;
 };
 
-inline void SDLRenderer::SetPixel (size_t index, ColorRGB color)
+inline void SDLRenderer::SetPixel (uint index, ColorRGB color)
 {
 	m_pixels[index] = color;
 }
 
-inline void SDLRenderer::SetPixel (size_t x, size_t y, ColorRGB color)
+inline void SDLRenderer::SetPixel (uint x, uint y, ColorRGB color)
 {
-	SetPixel(y*m_WIDTH + x, color);
+	m_pixels[y*m_WIDTH + x] = color;
 }
 
 #endif

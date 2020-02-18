@@ -2,15 +2,16 @@
 
 #include "global.hpp"
 
+#include <cmath>
+#include <iostream>
+
 #include "SDL.h"
 
 #include "Color.hpp"
 #include "Chrono.hpp"
 
-#include <algorithm>
-
-constexpr size_t MAX_FPS = 240;
-constexpr size_t MIN_FPS = 15;
+constexpr uint MAX_FPS = 240;
+constexpr uint MIN_FPS = 15;
 
 static int TEST = 0;
 
@@ -36,7 +37,7 @@ int Game::Run ()
     int rc = GameErrorCode::OK;
 
     // Used in computing time-step
-    size_t previous = Chrono::GetTicks();
+    uint previous = Chrono::GetTicks();
     size_t current = 0;
     size_t elapsed = 0;
     size_t lag = 0;
@@ -114,16 +115,19 @@ bool Game::ProcessEvents ()
     return false; // in the normal case, we are NOT exiting the game loop
 }
 
+static uint COUNT = 0;
+
 void Game::DrawWorld (float dt)
 {
-    // TODO: Use the normalized lag dt to produce a more accurate render    
+    // TODO: Use the normalized lag dt to produce a more accurate render
 
-    m_pRenderer->DrawLine(20, 13, 40, 80, Color::Red); 
-    m_pRenderer->DrawLine(10, 150, 100, 20, Color::Cyan);
-    m_pRenderer->DrawLine(13, 20, 80, 40, Color::Green); 
-    m_pRenderer->DrawLine(10, 150, 100, 130, Color::Purple);
-    m_pRenderer->DrawLine(50, 150, 50, 20, Color::Yellow);    
-    m_pRenderer->DrawLine(50, 100, 100, 100, Color::Yellow);    
-    
+    float const theta = (COUNT++/1000.f) * (2*M_PI);
+    float const r = 110.f;
+    float const x = r * cos(theta);
+    float const y = -r * sin(theta);
+    float const x_center = m_screenWidth/2.f;
+    float const y_center = m_screenHeight/2.f;
+    m_pRenderer->DrawLine(x_center, y_center, x_center + x, y_center + y, Color::Orange);
+
     m_pRenderer->RenderFrame();
 }

@@ -10,4 +10,9 @@
 
 #include <cstdint>
 
+#ifndef uint
+typedef uint32_t uint;
+#endif
+typedef int32_t sint;
+
 #endif

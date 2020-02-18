@@ -67,8 +67,6 @@ else()
         /opt
     )
 
-#####
-
     FIND_PATH(SDL2_INCLUDE_DIRS SDL.h
         HINTS
         $ENV{SDL2DIR}
@@ -140,27 +138,5 @@ else()
     ENDIF(SDL2_LIBRARY_TEMP)
 
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2 REQUIRED_VARS SDL2_LIBS SDL2_INCLUDE_DIRS)
-#####
 
-
-
-    # # On MacOS, should be installed via Macports (TODO: actually, I put it at Library/Frameworks)
-    # # On Ubuntu, install with: apt-get install libsdl2-dev
-    # find_path(SDL2_INCLUDE_DIRS SDL.h
-    #     HINTS
-    #     $ENV{SDL2DIR}
-    #     PATH_SUFFIXES SDL2 include/SDL2 include
-    #     PATHS ${SDL2_SEARCH_PATHS}
-    # )
-    # find_library(_SDL2_LIB SDL2
-    #     PATHS ${SDL2_SEARCH_PATHS}
-    # )
-    # set(SDL2_LIBS ${SDL2})
-    # if(_SDL2_use_main)
-    #     find_library(_SDL2main_LIB SDL2)
-    #     list(APPEND SDL2_LIBS ${_SDL2main_LIB})
-    # endif()
-
-    # mark_as_advanced(SDL2_INCLUDE_DIRS _SDL2_LIB _SDL2main_LIB)
-    # find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_INCLUDE_DIRS SDL2_LIBS)
-    endif()
+endif()
