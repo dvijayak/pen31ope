@@ -7,6 +7,8 @@
 
 #include "IRenderer.hpp"
 
+class Mesh;
+
 class Game
 {
 public:
@@ -46,6 +48,8 @@ private:
 	// the Observer pattern in due time...
 	float m_screenWidth;
 	float m_screenHeight;
+
+	std::vector<std::unique_ptr<Mesh>> m_objects;
 };
 
 #endif

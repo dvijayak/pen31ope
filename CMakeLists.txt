@@ -6,15 +6,21 @@ set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeMods/")
 find_package(SDL2 REQUIRED)
 
-message("${SDL2} ${SDL2_INCLUDE_DIRS} ${SDL2_LIBS}")
-
-include_directories(${SDL2_INCLUDE_DIRS} "3rdParty" "Common" "Core")
+include_directories(${SDL2_INCLUDE_DIRS}
+    "3rdParty"
+    "Common"
+    "Core"
+    "Geometry"
+    "Math"
+)
 add_executable(3dlib
     main.cpp
     Game.cpp
     Common/Chrono.cpp
     Core/IRenderer.cpp
     Core/SDLRenderer.cpp
+    Geometry/Mesh.cpp
+    Math/Vector3.cpp
     )
 target_link_libraries(3dlib ${SDL2_LIBS})
 
