@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(3dlib)
+project(pen31ope)
 
 set (CMAKE_CXX_STANDARD 14)
 
@@ -13,7 +13,7 @@ include_directories(${SDL2_INCLUDE_DIRS}
     "Geometry"
     "Math"
 )
-add_executable(3dlib
+add_executable(pen31ope
     main.cpp
     Game.cpp
     Common/Chrono.cpp
@@ -22,13 +22,13 @@ add_executable(3dlib
     Geometry/Mesh.cpp
     Math/Vector3.cpp
     )
-target_link_libraries(3dlib ${SDL2_LIBS})
+target_link_libraries(pen31ope ${SDL2_LIBS})
 
 # Copy SDL2 DLLs to output folder on Windows
 # Thanks to https://github.com/preshing/CMakeDemo/blob/master/CMakeLists.txt#L21
 if(WIN32)
     foreach(DLL ${SDL2_DLLS})
-        add_custom_command(TARGET 3dlib POST_BUILD COMMAND
-            ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:3dlib>)
+        add_custom_command(TARGET pen31ope POST_BUILD COMMAND
+            ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:pen31ope>)
     endforeach()
 endif()
