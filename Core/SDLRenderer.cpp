@@ -20,7 +20,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
         SDL_WINDOWPOS_CENTERED,
         width,
         height,
-        SDL_WINDOW_RESIZABLE
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         );
 
     m_WIDTH = width;
