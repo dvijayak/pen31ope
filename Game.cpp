@@ -119,36 +119,37 @@ bool Game::ProcessEvents ()
     return false; // in the normal case, we are NOT exiting the game loop
 }
 
+Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
+{
+    return Vector3(
+        (v.x() + 1.f) * 0.5f * m_screenWidth,
+        (v.y() * -1.f + 1.f) * 0.5f * m_screenHeight // y-coordinates are flipped in screen space
+        );
+}
+
 static uint COUNT = 0;
 
 void Game::DrawWorld (float dt)
 {
     // TODO: Use the normalized lag dt to produce a more accurate render
 
-    float const theta = (COUNT++/1000.f) * (2*M_PI);
-    float const r = std::min(m_screenWidth, m_screenHeight) / 2.0f;
-    float const x = r * cos(theta);
-    float const y = -r * sin(theta);
-    float const x_center = m_screenWidth/2.f;
-    float const y_center = m_screenHeight/2.f;
-    m_pRenderer->DrawLine(x_center, y_center, x_center + x, y_center + y, Color::Orange);
+    // float const theta = (COUNT++/1000.f) * (2*M_PI);
+    // float const r = std::min(m_screenWidth, m_screenHeight) / 2.0f;
+    // float const x = r * cos(theta);
+    // float const y = -r * sin(theta);
+    // float const x_center = m_screenWidth/2.f;
+    // float const y_center = m_screenHeight/2.f;
+    // m_pRenderer->DrawLine(x_center, y_center, x_center + x, y_center + y, Color::Orange);
 
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
         for (auto face : obj->GetFaces())
         {
-            for (int i = 0; i < 3; i++)
-            {
-                // Convert from [-1, 1] to [0, 1], then scale by screen dimensions
-                // Y coordinates are flipped in screen spacw
-                float x1 = (face[i].x() + 1.f) * 0.5 * m_screenWidth;
-                float y1 = (face[i].y() * -1.f + 1.f) * 0.5 * m_screenHeight;
-                float x2 = (face[(i + 1) % 3].x() + 1.f) * 0.5 * m_screenWidth;
-                float y2 = (face[(i + 1) % 3].y() * -1.f + 1.f) * 0.5 * m_screenHeight;
-
-                m_pRenderer->DrawLine(x1, y1, x2, y2, Color::White);
-            }
+            Vector3 v0 = NDCToScreenPixels(Vector3(face[0].x(), face[0].y()));
+            Vector3 v1 = NDCToScreenPixels(Vector3(face[1].x(), face[1].y()));
+            Vector3 v2 = NDCToScreenPixels(Vector3(face[2].x(), face[2].y()));
+            m_pRenderer->DrawTriangle(v0.x(), v0.y(), v1.x(), v1.y(), v2.x(), v2.y(), Color::Random());
         }
     }
 

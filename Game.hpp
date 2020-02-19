@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "IRenderer.hpp"
+#include "Vector3.hpp"
 
 class Mesh;
 
@@ -21,10 +22,14 @@ public:
 	Game ();
 	~Game ();
 
-	/// Set the FPS. Also resynchronizes the update time-step
+	/**
+	 * Set the FPS. Also resynchronizes the update time-step
+	 */
 	void SetTargetFrameRate (size_t);
 
-	/// Game loop. Expected to be called only once at the beginning of the game.
+	/**
+	 *  Game loop. Expected to be called only once at the beginning of the game.
+	 */
 	int Run ();
 
 	void SetRenderer (IRenderer* pRM) { m_pRenderer = pRM; }
@@ -32,13 +37,22 @@ public:
 	void SetScreenWidth (float width) { m_screenWidth = width; }
 	void SetScreenHeight (float height) { m_screenHeight = height; }
 
-	/// Performed once normally at the beginning of each frame
+	/**
+	 * Performed once normally at the beginning of each frame
+	 */
 	bool ProcessEvents ();
 
-	/// Performed once normally at the end of each frame
+	/**
+	 * Performed once normally at the end of each frame
+	 */
 	void DrawWorld (float dt); // dt => normalized lag, i.e. how far into the next frame update cycle the game loop is currently in
 
 private:
+	/**
+	 * Convert from [-1, 1] to [0, 1], then scale by screen dimensions
+	 */
+	Vector3 NDCToScreenPixels (Vector3 const& v) const;
+
 	size_t m_targetFrameRate; // FPS
 	size_t m_fixedUpdateTimeStep; // milliseconds, normally synced to target frame rate
 

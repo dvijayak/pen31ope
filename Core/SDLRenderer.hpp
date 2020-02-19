@@ -29,10 +29,10 @@ public:
     // void DrawPolygon (const PolygonF& poly, Uint32 color=Color::White);
 
     /// IRenderer
-    void SetPixel (uint index, ColorRGB color=Color::Black);
-    void SetPixel (uint x, uint y, ColorRGB color=Color::Black);
-    void FillScreenBackground (ColorRGB color=Color::Black);
-    void RenderFrame ();
+    void SetPixel (uint index, ColorRGB color=Color::Black) override;
+    void SetPixel (uint x, uint y, ColorRGB color=Color::Black) override;
+    void FillScreenBackground (ColorRGB color=Color::Black) override;
+    void RenderFrame () override;
 
 private:
     uint m_WIDTH;

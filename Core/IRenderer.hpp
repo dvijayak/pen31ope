@@ -16,6 +16,7 @@ public:
 
     // Basic drawing routines
     virtual void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color);
+    virtual void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color);
 
     /**
      * Should be invoked once a frame of pixels is ready to be sent to a video device.

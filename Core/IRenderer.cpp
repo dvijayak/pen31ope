@@ -1,6 +1,12 @@
 #include "IRenderer.hpp"
 
 #include <cmath>
+#include <array>
+#include <map>
+#include <algorithm>
+#include <functional>
+
+#include "Interpolate.hpp"
 
 void IRenderer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color)
 {
@@ -58,13 +64,6 @@ void IRenderer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color
  * Alternative lerp approach that is more concise than Bresenham's algo,
  * courtesy of https://www.redblobgames.com/grids/line-drawing.html
 
-static float lerp (float v0, float v1, float t)
-{
-   return v0 + (v1 - v0) * t;
-   // OR
-   // return v0 * (1.f - t) + v1 * t;
-}
-
 void IRenderer::DrawLine (uint x0, uint y0, uint x1, uint y1, ColorRGB color)
 {
    int dx = x1 - x0, dy = y1 - y0;
@@ -74,10 +73,65 @@ void IRenderer::DrawLine (uint x0, uint y0, uint x1, uint y1, ColorRGB color)
    for (uint step = 0; step <= maxSteps; ++step)
    {
       float t = maxSteps == 0 ? 0 : step / float(maxSteps);
-      float x = lerp(x0, x1, t);
-      float y = lerp(y0, y1, t);
+      float x = Lerp(x0, x1, t);
+      float y = Lerp(y0, y1, t);
       SetPixel(floorf(x), floorf(y), color);
    }
 }
 
  */
+
+void IRenderer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color)
+{
+   std::array<std::pair<uint, uint>, 3> vertices {
+      std::make_pair(x0, y0),
+      std::make_pair(x1, y1),
+      std::make_pair(x2, y2)
+   };
+
+   // Sort vertices by y-component in ascending order (since y increases downwards) and by x-component in ascending order
+   std::sort(vertices.begin(), vertices.end(), [](auto const& a, auto const& b) {
+      float x_a = a.first, y_a = a.second;
+      float x_b = b.first, y_b = b.second;
+      return (y_a == y_b) ? (x_a < x_b) : (y_a < y_b);
+   });
+
+   // For convenience, we assume the following edge labeling scheme:
+   //    AB = vertices[0], vertices[1]
+   //    BC = vertices[1], vertices[2]
+   //    AC = vertices[0], vertices[2]
+   uint x_A = vertices[0].first, y_A = vertices[0].second;
+   uint x_B = vertices[1].first, y_B = vertices[1].second;
+   uint x_C = vertices[2].first, y_C = vertices[2].second;
+
+   float dy_AB = float(y_B - y_A);
+   float dy_BC = float(y_C - y_B);
+   float dy_AC = float(y_C - y_A);
+   
+   // Handle case where A and B have the same y-component
+   bool hasFinishedAB = y_B - y_A == 0;
+
+   // Linearly interpolate every row within the triangle
+   for (uint y = y_A; y <= y_C; ++y)
+   {
+      // Edges AB and BC, starting with AB
+      float t, x_t;
+      if (!(hasFinishedAB = hasFinishedAB || y > y_B))
+      {
+         t = dy_AB == 0 ? 0 : (y - y_A) / dy_AB;
+         x_t = Lerp(x_A, x_B, t);
+      }
+      else
+      {
+         t = dy_BC == 0 ? 0 : (y - y_B) / dy_BC;
+         x_t = Lerp(x_B, x_C, t);
+      }
+
+      // Finally, the easiest edge: AC
+      float u = dy_AC == 0 ? 1.f : (y - y_A) / dy_AC;
+      float x_u = Lerp(x_A, x_C, u);
+
+      // Draw row
+      DrawLine(static_cast<uint>(x_t), y, static_cast<uint>(x_u), y, color);
+   }
+}
