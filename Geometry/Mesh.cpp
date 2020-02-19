@@ -41,7 +41,6 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     while (ifs.good())
     {
         ifs.getline(buf, bufSize);
-        // std::cout << std::string(buf) << std::endl;
 
         // Tokenize line by space
         std::vector<std::string> tokens = split(buf, ' ');
@@ -86,7 +85,6 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     if (ifs.eof())
     {
         // On EOF, prepare the Mesh object and quit
-        std::cout << "DONE" << std::endl;
         auto pMesh = std::make_unique<Mesh>();
         for (auto face : faces)
         {

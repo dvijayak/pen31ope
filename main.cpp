@@ -1,6 +1,7 @@
 #include "global.hpp"
 
 #include <memory>
+#include <sstream>
 
 #define SDL_MAIN_HANDLED
 
@@ -8,12 +9,32 @@
 #include "Game.hpp"
 #include "Logger.hpp"
 
-uint16_t const WIDTH = 1920;
-uint16_t const HEIGHT = 1200;
+uint WIDTH = 1024;
+uint HEIGHT = 768;
 
 int main (int argc, char** argv)
 {
     // INITIALIZE_BASIC_LOGGERS();
+
+    // Command-line args
+    if (argc >= 3)
+    {
+        // Set game graphics resolution
+        uint width, height;
+
+        std::stringstream ss_w(argv[1]), ss_h(argv[2]);
+        ss_w >> width;
+        ss_h >> height;
+
+        if (width > 0 && width <= 3840)
+        {
+            WIDTH = width;
+        }
+        if (height > 0 && height <= 3840)
+        {
+            HEIGHT = height;
+        }
+    }
 
     SDL_SetMainReady();
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII

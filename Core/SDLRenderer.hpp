@@ -57,8 +57,6 @@ inline void SDLRenderer::SetPixel (uint x, uint y, ColorRGB color)
 {
     if (x < m_WIDTH && y < m_HEIGHT)
         m_pixels[y*m_WIDTH + x] = color;
-    else
-        std::cout << "[" << x << "," << y << "]" << std::endl;
 }
 
 #endif
