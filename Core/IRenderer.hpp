@@ -11,7 +11,7 @@ public:
 
     // Fundamental routines
     virtual void SetPixel (uint index, ColorRGB color) = 0;
-	virtual void SetPixel (uint x, uint y, ColorRGB color) = 0;
+    virtual void SetPixel (uint x, uint y, ColorRGB color) = 0;
     virtual void FillScreenBackground (ColorRGB color=Color::Black) = 0;
 
     // Basic drawing routines
@@ -21,7 +21,7 @@ public:
     /**
      * Should be invoked once a frame of pixels is ready to be sent to a video device.
      */
-	virtual void RenderFrame () = 0;
+    virtual void RenderFrame () = 0;
 };
 
 #endif

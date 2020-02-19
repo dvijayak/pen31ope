@@ -49,7 +49,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
 
 SDLRenderer::~SDLRenderer ()
 {
-	trclog("Shutting down SDL...");
+    trclog("Shutting down SDL...");
 
     SDL_DestroyWindow(m_pWindow);
 
