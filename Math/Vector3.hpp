@@ -14,15 +14,22 @@ private:
     float m_z;
 
 public:
+    static Vector3 Up;
+    static Vector3 Down;
+    static Vector3 Left;
+    static Vector3 Right;
+    static Vector3 Forward;
+    static Vector3 Backward;
+
     explicit Vector3 (float const x=0, float const y=0, float const z=0)
         : m_x(x), m_y(y), m_z(z)
     {}
 
     Vector3(Vector3 const& pointFrom, Vector3 const& pointTo);
 
-    float x () const { return m_x; }
-    float y () const { return m_y; }
-    float z () const { return m_z; }
+    inline float x () const { return m_x; }
+    inline float y () const { return m_y; }
+    inline float z () const { return m_z; }
 
     /**
      * Flip direction

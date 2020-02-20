@@ -8,6 +8,13 @@ std::ostream& operator<< (std::ostream& os, Vector3 const& v)
     return os;
 }
 
+Vector3 Vector3::Up         = Vector3( 0,  1,  0);
+Vector3 Vector3::Down       = Vector3( 0, -1,  0);
+Vector3 Vector3::Left       = Vector3( 1,  0,  0);
+Vector3 Vector3::Right      = Vector3(-1,  0,  0);
+Vector3 Vector3::Forward    = Vector3( 0,  0,  1);
+Vector3 Vector3::Backward   = Vector3( 0,  0, -1);
+
 Vector3::Vector3 (Vector3 const& pointFrom, Vector3 const& pointTo)
 {
     Vector3 v = pointTo - pointFrom;

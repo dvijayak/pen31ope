@@ -37,7 +37,7 @@ int Game::Run ()
     m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/african_head.obj")));
     // m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/diablo_pose.obj")));
 
-    m_lights.push_back(Vector3(0, 0, -1.f).Normalized());
+    m_lights.push_back(Vector3::Backward.Normalized());
 
     //// Game loop ////
     
@@ -58,7 +58,7 @@ int Game::Run ()
         elapsed = current - previous;
         lag += elapsed;
         previous = current;
-        // console("elapsed = {}, lag = {}",  elapsed, lag);
+        // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
         if (ProcessEvents()) break;
@@ -72,9 +72,10 @@ int Game::Run ()
         // Render the game using the normalized lag
         DrawWorld(float(lag)/float(m_fixedUpdateTimeStep));
 
+        #ifdef NDEBUG
         // Consider sleeping a bit after a cycle to save power/energy on the host platform
-        // TODO: Make this a configurable setting
         SDL_Delay(1);
+        #endif
     }
 
     return rc;
@@ -110,6 +111,13 @@ bool Game::ProcessEvents ()
         {
             case SDL_KEYDOWN:
             case SDL_KEYUP:
+                // TODO: Just for testing
+                {
+                    float movement = 0.1f;
+                    movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
+                    m_lights[0] = (m_lights[0] + (Vector3::Left * movement)).Normalized();
+                }
+                break;
             case SDL_MOUSEMOTION:
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
@@ -129,8 +137,6 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
         (v.y() * -1.f + 1.f) * 0.5f * m_screenHeight // y-coordinates are flipped in screen space
         );
 }
-
-static uint COUNT = 0;
 
 void Game::DrawWorld (float dt)
 {
