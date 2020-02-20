@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 typedef uint32_t ColorRGB; // includes alpha channel
 
@@ -44,6 +45,19 @@ public:
     inline static ColorRGB Random ()
     {
         return Mix(uint8_t(rand() % 0xFF), uint8_t(rand() % 0xFF), uint8_t(rand() % 0xFF));
+    }
+
+    /**
+     * Generate a new shade of the given color corresponding to the given intensity value.
+     * @param {ColorRGB} color
+     * @param {float} i Must be between 0 and 1 inclusive
+     */
+    inline static ColorRGB Intensify (ColorRGB color, float i)
+    {
+        float r = float(color >> 24) * i;
+        float g = float((color >> 16) & 0x00FF) * i;
+        float b = float((color >> 8) & 0x0000FF) * i;
+        return Mix(uint8_t(roundf(r)), uint8_t(roundf(g)), uint8_t(roundf(b)));
     }
 
     // Converts a color value to an HTML hex string

@@ -3,6 +3,9 @@
 
 #include <iostream>
 
+class Vector3;
+typedef Vector3 Vector;
+
 class Vector3
 {
 private:
@@ -11,33 +14,38 @@ private:
     float m_z;
 
 public:
-    Vector3 (float x=0, float y=0, float z=0)
+    explicit Vector3 (float const x=0, float const y=0, float const z=0)
         : m_x(x), m_y(y), m_z(z)
     {}
 
-    Vector3 (Vector3 const& other)
-        : m_x(other.m_x), m_y(other.m_y), m_z(other.m_z)
-    {}
-
-    Vector3& operator= (Vector3 const& other)
-    {
-        m_x = other.m_x;
-        m_y = other.m_y;
-        m_z = other.m_z;
-        return *this;
-    }
+    Vector3(Vector3 const& pointFrom, Vector3 const& pointTo);
 
     float x () const { return m_x; }
     float y () const { return m_y; }
     float z () const { return m_z; }
 
+    /**
+     * Flip direction
+     */
+    Vector3 operator- () const;
+
+    Vector3 operator+ (Vector3 const& other) const;
+    Vector3 operator- (Vector3 const& other) const;
+    /**
+     * Component-wise multiplication: NOT dot product
+     */
+    Vector3 operator* (Vector3 const& other) const;
+    Vector3 operator* (float const scalar) const;
+
     float Dot (Vector3 const& other) const;
+    Vector3 Cross (Vector3 const& other) const;
 
     float Magnitude () const;
     inline float Length () const { return Magnitude(); }
     inline float Norm () const { return Magnitude(); }
 
-    void Normalize ();
+    void Normalize (); // modifies in-place
+    Vector3 Normalized () const;
 };
 
 std::ostream& operator<< (std::ostream& os, Vector3 const& v);

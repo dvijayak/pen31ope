@@ -8,14 +8,14 @@
 - 3D mesh data structures
    - Vertex/Face
 - Rendering a mesh in wireframe mode
-- Flat shading
-   - Rasterizing triangles using old-school "line sweep"
+- Rasterizing triangles using old-school "line sweep"
 - Math library
    - Vectors
       - Component-wise addition, subtraction, multiplication, division
       - Dot product
       - Magnitude
       - Normalizing
+- Flat shading
 
 # To Learn
 

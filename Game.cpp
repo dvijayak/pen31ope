@@ -35,6 +35,9 @@ int Game::Run ()
     //// Create some test objects ////
 
     m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/african_head.obj")));
+    // m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/diablo_pose.obj")));
+
+    m_lights.push_back(Vector3(0, 0, -1.f).Normalized());
 
     //// Game loop ////
     
@@ -133,23 +136,24 @@ void Game::DrawWorld (float dt)
 {
     // TODO: Use the normalized lag dt to produce a more accurate render
 
-    // float const theta = (COUNT++/1000.f) * (2*M_PI);
-    // float const r = std::min(m_screenWidth, m_screenHeight) / 2.0f;
-    // float const x = r * cos(theta);
-    // float const y = -r * sin(theta);
-    // float const x_center = m_screenWidth/2.f;
-    // float const y_center = m_screenHeight/2.f;
-    // m_pRenderer->DrawLine(x_center, y_center, x_center + x, y_center + y, Color::Orange);
+    ColorRGB color = Color::White;
 
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
-        for (auto face : obj->GetFaces())
-        {
+        for (auto const& face : obj->GetFaces())
+        {            
+            float intensity = -m_lights[0].Dot(face.Normal());
+
+            // Back-face culling
+            if (intensity <= 0) continue;
+            
+            ColorRGB intensifiedColor = Color::Intensify(color, intensity);
+
             Vector3 v0 = NDCToScreenPixels(Vector3(face[0].x(), face[0].y()));
             Vector3 v1 = NDCToScreenPixels(Vector3(face[1].x(), face[1].y()));
             Vector3 v2 = NDCToScreenPixels(Vector3(face[2].x(), face[2].y()));
-            m_pRenderer->DrawTriangle(v0.x(), v0.y(), v1.x(), v1.y(), v2.x(), v2.y(), Color::Random());
+            m_pRenderer->DrawTriangle(v0.x(), v0.y(), v1.x(), v1.y(), v2.x(), v2.y(), intensifiedColor);
         }
     }
 

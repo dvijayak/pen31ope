@@ -86,14 +86,18 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     {
         // On EOF, prepare the Mesh object and quit
         auto pMesh = std::make_unique<Mesh>();
-        for (auto face : faces)
+        for (auto const& face : faces)
         {
-            FacesT::value_type expandedFaces;
+            Triangle::vertices_type expandedFaces;
             for (int i = 0; i < 3; i++)
             {
                 expandedFaces[i] = vertices[face[i] - 1]; // OBJ file indices start from 1, so compensate
             }
-            pMesh->m_faces.push_back(expandedFaces);
+
+            // Create the face from the vertices, compute surface normal, etc.
+            face_type triangle(expandedFaces);            
+            triangle.m_normal = Vector3(triangle[0], triangle[1]).Cross(Vector3(triangle[0], triangle[2])).Normalized();
+            pMesh->m_faces.push_back(triangle);
         }
         return pMesh;
     }

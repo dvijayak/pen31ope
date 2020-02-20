@@ -64,6 +64,7 @@ private:
     float m_screenHeight;
 
     std::vector<std::unique_ptr<Mesh>> m_objects;
+    std::vector<Vector3> m_lights;
 };
 
 #endif
