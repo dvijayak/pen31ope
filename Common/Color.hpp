@@ -52,11 +52,13 @@ public:
      * @param {ColorRGB} color
      * @param {float} i Must be between 0 and 1 inclusive
      */
-    inline static ColorRGB Intensify (ColorRGB color, float i)
+    inline static ColorRGB Intensify (ColorRGB color, float i, float gamma=2.2f)
     {
-        float r = float(color >> 24) * i;
-        float g = float((color >> 16) & 0x00FF) * i;
-        float b = float((color >> 8) & 0x0000FF) * i;
+        float c = powf(i, gamma);
+
+        float r = float(color >> 24) * c;
+        float g = float((color >> 16) & 0x00FF) * c;
+        float b = float((color >> 8) & 0x0000FF) * c;
         return Mix(uint8_t(roundf(r)), uint8_t(roundf(g)), uint8_t(roundf(b)));
     }
 

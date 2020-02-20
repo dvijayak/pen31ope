@@ -16,6 +16,7 @@
       - Magnitude
       - Normalizing
 - Flat shading
+- Gamma correction
 
 # To Learn
 

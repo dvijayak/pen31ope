@@ -142,14 +142,13 @@ void Game::DrawWorld (float dt)
     {
         if (!obj) continue;
         for (auto const& face : obj->GetFaces())
-        {            
-            float intensity = -m_lights[0].Dot(face.Normal());
+        {
+            float intensity = m_lights[0].Dot(face.Normal());
 
             // Back-face culling
-            if (intensity <= 0) continue;
+            if (intensity >= 0) continue;
             
-            ColorRGB intensifiedColor = Color::Intensify(color, intensity);
-
+            ColorRGB intensifiedColor = Color::Intensify(color, -intensity);
             Vector3 v0 = NDCToScreenPixels(Vector3(face[0].x(), face[0].y()));
             Vector3 v1 = NDCToScreenPixels(Vector3(face[1].x(), face[1].y()));
             Vector3 v2 = NDCToScreenPixels(Vector3(face[2].x(), face[2].y()));

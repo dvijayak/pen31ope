@@ -37,6 +37,9 @@ public:
     Vector3 operator* (Vector3 const& other) const;
     Vector3 operator* (float const scalar) const;
 
+    /**
+     * Tip: Dot product of unit vectors will range between -1 and 1, inclusive
+     */
     float Dot (Vector3 const& other) const;
     Vector3 Cross (Vector3 const& other) const;
 
