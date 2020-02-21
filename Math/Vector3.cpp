@@ -66,6 +66,15 @@ Vector3 Vector3::Cross (Vector3 const& other) const
     );
 }
 
+Vector3 Vector3::Cross (float const x, float const y, float const z) const
+{
+    return Vector3(
+        m_y * z - m_z * y,
+        m_z * x - m_x * z,
+        m_x * y - m_y * x  
+    );
+}
+
 float Vector3::Magnitude () const
 {
     return sqrtf(Dot(*this));

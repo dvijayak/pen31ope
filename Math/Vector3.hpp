@@ -49,6 +49,7 @@ public:
      */
     float Dot (Vector3 const& other) const;
     Vector3 Cross (Vector3 const& other) const;
+    Vector3 Cross (float const x, float const y, float const z) const;
 
     float Magnitude () const;
     inline float Length () const { return Magnitude(); }

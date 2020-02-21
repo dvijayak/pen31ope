@@ -22,6 +22,10 @@
 
 This serves as a high-level TODO list, in no particular order.
 
+- Primitive 3D objecs
+   - Cube
+   - Sphere
+   - Plane
 - Camera
 - Projections
    - Perspective

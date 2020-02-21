@@ -7,6 +7,9 @@
 #include <functional>
 
 #include "Interpolate.hpp"
+#include "Vector3.hpp"
+#include "Box.hpp"
+#include "Triangle.hpp"
 
 void IRenderer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color)
 {
@@ -135,3 +138,36 @@ void IRenderer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint 
       DrawLine(static_cast<uint>(x_t), y, static_cast<uint>(x_u), y, color);
    }
 }
+
+/**
+ * Alternative approach using barycentric coordinates relative to the triangle.
+ * I don't fully understand the theory, so this code is mostly courtesy of [ssloy](https://github.com/ssloy/tinyrenderer/wiki/Lesson-2-Triangle-rasterization-and-back-face-culling)
+ * This is the rasterization approach used in ray-tracing algorithms
+
+void IRenderer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color)
+{
+   std::array<Vector3, 3> vertices = {
+      Vector3(x0, y0),
+      Vector3(x1, y1),
+      Vector3(x2, y2)
+   };
+
+   auto const boundingBox = TriangleUtil::MinimumBoundingBox(vertices);
+   
+   uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
+   uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
+   for (uint x = x_start; x <= x_end; ++x)
+   {
+      for (uint y = y_start; y <= y_end; ++y)
+      {
+         Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), vertices);
+
+         if (baryCoords.x() >= 0 && baryCoords.y() >= 0 && baryCoords.z() >= 0)
+         {
+               SetPixel(x, y, color);
+         }
+      }
+   }
+}
+
+ */

@@ -19,15 +19,6 @@ public:
 
     void Initialize (std::string windowTitle, uint width, uint height);
 
-    /// Helpers
-
-    // TODO: Redraw
-    /// All draw functions expect normalized device coordinates of range [0, 1]
-    // void DrawPoint (PointF const&, Uint32 color=Color::White);
-    // void DrawLine (float, float, float, float, Uint32 color=Color::White); 
-    // void DrawLine (const LineSegmentF& seg, Uint32 color=Color::White);
-    // void DrawPolygon (const PolygonF& poly, Uint32 color=Color::White);
-
     /// IRenderer
     void SetPixel (uint index, ColorRGB color=Color::Black) override;
     void SetPixel (uint x, uint y, ColorRGB color=Color::Black) override;
