@@ -15,13 +15,15 @@ public:
 
    BresenhamsLineRasterizer (IRenderer* pRenderer=nullptr) : Rasterizer(pRenderer) {}
 
-   void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) override;
+   void DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color) override;
 };
 
-void BresenhamsLineRasterizer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color)
+void BresenhamsLineRasterizer::DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color)
 {
-   int dx = x_e - x_s; // using a signed int is critical
-   int dy = y_e - y_s;
+   float x_s = from.x(), x_e = to.x(), y_s = from.y(), y_e = to.y();
+
+   int dx = x_e - x_s; // using a signed int is critical because we want to preserve negative deltas and NOT have integer overflow
+   int dy = y_e - y_s; // we also use int instead of float to avoid floating point comparison shenanigans
 
    // Handle degenerate case when a "line" is really just a single point
    // in order to avoid division by zero later
@@ -55,7 +57,7 @@ void BresenhamsLineRasterizer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e,
    int dyFinal = y_e - y_s;
    for (uint x = x_s; x <= x_e; x++)
    {
-      float t = (x - x_s) / float(dxFinal);
+      float t = float(x - x_s) / dxFinal;
       uint y = static_cast<uint>(floorf(y_s + float(dyFinal * t)));
 
       // If we had transposed the line, transpose it again to return it to its original octant

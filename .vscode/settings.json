@@ -78,7 +78,11 @@
         "mutex": "cpp",
         "string": "cpp",
         "system_error": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "queue": "cpp",
+        "random": "cpp",
+        "bit": "cpp",
+        "memory_resource": "cpp"
     },
     "cmake.configureOnOpen": false
 }

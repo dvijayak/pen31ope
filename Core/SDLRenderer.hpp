@@ -11,6 +11,7 @@
 #include "SDL.h"
 
 #include "Color.hpp"
+#include "Vector3.hpp"
 #include "ILineRasterizer.hpp"
 #include "ITriangleRasterizer.hpp"
 
@@ -29,9 +30,8 @@ public:
     void RenderFrame () override;
 
     /// IRenderer - Drawing
-    void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) override;
-    void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color) override;
-    void DrawTriangleZBuffer (Vector3 const& v1, Vector3 const& v2, Vector3 const& v3, ColorRGB color) override;
+    void DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color) override;
+    void DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color) override;
 
 private:
     uint m_WIDTH;
@@ -61,19 +61,14 @@ inline void SDLRenderer::SetPixel (uint x, uint y, ColorRGB color)
         m_pixels[y*m_WIDTH + x] = color;
 }
 
-inline void SDLRenderer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color)
+inline void SDLRenderer::DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color)
 {
-    m_pLineRasterizer->DrawLine(x_s, y_s, x_e, y_e, color);
+    m_pLineRasterizer->DrawLine(from, to, color);
 }
 
-inline void SDLRenderer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color)
+inline void SDLRenderer::DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color)
 {
-    m_pTriangleRasterizer->DrawTriangle(x0, y0, x1, y1, x2, y2, color);
-}
-
-inline void SDLRenderer::DrawTriangleZBuffer (Vector3 const& v1, Vector3 const& v2, Vector3 const& v3, ColorRGB color)
-{
-    m_pTriangleRasterizer->DrawTriangleZBuffer(v1, v2, v3, color);
+    m_pTriangleRasterizer->DrawTriangle(v0, v1, v2, color);
 }
 
 

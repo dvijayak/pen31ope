@@ -5,6 +5,8 @@
 #include "ILineRasterizer.hpp"
 
 #include <cmath>
+
+#include "Vector3.hpp"
 #include "Interpolate.hpp"
 
 /**
@@ -20,15 +22,17 @@ public:
 
    LerpLineRasterizer (IRenderer* pRenderer=nullptr) : Rasterizer(pRenderer) {}
 
-   void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) override;
+   void DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color) override;
 };
 
-void LerpLineRasterizer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color)
+void LerpLineRasterizer::DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color)
 {
-   int dx = x_e - x_s, dy = y_e - y_s;
+   float x_s = from.x(), x_e = to.x(), y_s = from.y(), y_e = to.y();
+
+   int dx = x_e - x_s;
+   int dy = y_e - y_s;
    float distance = sqrtf(dx*dx + dy*dy);
    uint maxSteps = floorf(distance);
-
    for (uint step = 0; step <= maxSteps; ++step)
    {
       float t = maxSteps == 0 ? 0 : step / float(maxSteps);

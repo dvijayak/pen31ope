@@ -28,31 +28,25 @@ public:
       , m_pLineRasterizer(pLineRasterizer)
    {}
 
-   void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color) override;
+   void DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color) override;
 };
 
-void LerpTriangleRasterizer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color)
+void LerpTriangleRasterizer::DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color)
 {
-   std::array<std::pair<uint, uint>, 3> vertices {
-      std::make_pair(x0, y0),
-      std::make_pair(x1, y1),
-      std::make_pair(x2, y2)
-   };
+   std::array<Vector3, 3> vertices {v0, v1, v2};
 
    // Sort vertices by y-component in ascending order (since y increases downwards) and by x-component in ascending order
    std::sort(vertices.begin(), vertices.end(), [](auto const& a, auto const& b) {
-      float x_a = a.first, y_a = a.second;
-      float x_b = b.first, y_b = b.second;
-      return (y_a == y_b) ? (x_a < x_b) : (y_a < y_b);
+      return int(a.y()) == int(b.y()) ? (a.x() < b.x()) : (a.y() < b.y());
    });
 
    // For convenience, we assume the following edge labeling scheme:
    //    AB = vertices[0], vertices[1]
    //    BC = vertices[1], vertices[2]
    //    AC = vertices[0], vertices[2]
-   uint x_A = vertices[0].first, y_A = vertices[0].second;
-   uint x_B = vertices[1].first, y_B = vertices[1].second;
-   uint x_C = vertices[2].first, y_C = vertices[2].second;
+   uint x_A = vertices[0].x(), y_A = vertices[0].y();
+   uint x_B = vertices[1].x(), y_B = vertices[1].y();
+   uint x_C = vertices[2].x(), y_C = vertices[2].y();
 
    float dy_AB = float(y_B - y_A);
    float dy_BC = float(y_C - y_B);
@@ -82,7 +76,7 @@ void LerpTriangleRasterizer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, u
       float x_u = Lerp(x_A, x_C, u);
 
       // Draw row
-      m_pLineRasterizer->DrawLine(static_cast<uint>(x_t), y, static_cast<uint>(x_u), y, color);
+      m_pLineRasterizer->DrawLine(Vector3(x_t, y), Vector3(x_u, y), color);
    }
 }
 

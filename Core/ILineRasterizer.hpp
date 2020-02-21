@@ -9,7 +9,7 @@ class ILineRasterizer
 public:
    virtual ~ILineRasterizer () {}
 
-   virtual void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) = 0;
+   virtual void DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color) = 0;
 };
 
 #endif

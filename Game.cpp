@@ -58,7 +58,7 @@ int Game::Run ()
         elapsed = current - previous;
         lag += elapsed;
         previous = current;
-        // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
         if (ProcessEvents()) break;
@@ -159,7 +159,7 @@ void Game::DrawWorld (float dt)
             Vector3 v0 = NDCToScreenPixels(face[0]);
             Vector3 v1 = NDCToScreenPixels(face[1]);
             Vector3 v2 = NDCToScreenPixels(face[2]);
-            m_pRenderer->DrawTriangleZBuffer(v0, v1, v2, intensifiedColor);
+            m_pRenderer->DrawTriangle(v0, v1, v2, intensifiedColor);
         }
     }
 

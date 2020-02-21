@@ -59,6 +59,7 @@ This serves as a high-level TODO list, in no particular order.
 - Shaders
    - Vertex shaders
    - Fragment/Pixel shaders
+- Rays
 - Texture mapping
 - Anti-aliasing
 - Perspective correct interpolation
