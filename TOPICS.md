@@ -17,6 +17,11 @@
       - Normalizing
 - Flat shading
 - Gamma correction
+- Hidden faces removal via Z-Buffer
+- Barycentric coordinates
+   - Triangle rasterizing
+   - Z-buffer
+
 
 # To Learn
 

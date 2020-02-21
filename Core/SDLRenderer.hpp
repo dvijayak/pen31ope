@@ -31,6 +31,7 @@ public:
     /// IRenderer - Drawing
     void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) override;
     void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color) override;
+    void DrawTriangleZBuffer (Vector3 const& v1, Vector3 const& v2, Vector3 const& v3, ColorRGB color) override;
 
 private:
     uint m_WIDTH;
@@ -68,6 +69,11 @@ inline void SDLRenderer::DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, Color
 inline void SDLRenderer::DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color)
 {
     m_pTriangleRasterizer->DrawTriangle(x0, y0, x1, y1, x2, y2, color);
+}
+
+inline void SDLRenderer::DrawTriangleZBuffer (Vector3 const& v1, Vector3 const& v2, Vector3 const& v3, ColorRGB color)
+{
+    m_pTriangleRasterizer->DrawTriangleZBuffer(v1, v2, v3, color);
 }
 
 

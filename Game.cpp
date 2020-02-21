@@ -134,7 +134,8 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
 {
     return Vector3(
         (v.x() + 1.f) * 0.5f * m_screenWidth,
-        (v.y() * -1.f + 1.f) * 0.5f * m_screenHeight // y-coordinates are flipped in screen space
+        (v.y() * -1.f + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
+        v.z()
         );
 }
 
@@ -143,7 +144,7 @@ void Game::DrawWorld (float dt)
     // TODO: Use the normalized lag dt to produce a more accurate render
 
     ColorRGB color = Color::White;
-
+    
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
@@ -155,10 +156,10 @@ void Game::DrawWorld (float dt)
             if (intensity >= 0) continue;
             
             ColorRGB intensifiedColor = Color::Intensify(color, -intensity);
-            Vector3 v0 = NDCToScreenPixels(Vector3(face[0].x(), face[0].y()));
-            Vector3 v1 = NDCToScreenPixels(Vector3(face[1].x(), face[1].y()));
-            Vector3 v2 = NDCToScreenPixels(Vector3(face[2].x(), face[2].y()));
-            m_pRenderer->DrawTriangle(v0.x(), v0.y(), v1.x(), v1.y(), v2.x(), v2.y(), intensifiedColor);
+            Vector3 v0 = NDCToScreenPixels(face[0]);
+            Vector3 v1 = NDCToScreenPixels(face[1]);
+            Vector3 v2 = NDCToScreenPixels(face[2]);
+            m_pRenderer->DrawTriangleZBuffer(v0, v1, v2, intensifiedColor);
         }
     }
 

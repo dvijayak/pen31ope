@@ -6,12 +6,10 @@
 #include "Logger.hpp"
 #include "BresenhamsLineRasterizer.hpp"
 #include "LerpTriangleRasterizer.hpp"
+#include "BarycentricTriangleRasterizer.hpp"
 
 SDLRenderer::SDLRenderer ()
-{
-    m_pLineRasterizer = std::make_unique<BresenhamsLineRasterizer>(this);
-    m_pTriangleRasterizer = std::make_unique<LerpTriangleRasterizer>(this, m_pLineRasterizer.get());
-}
+{}
 
 void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
 {
@@ -45,7 +43,16 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
     SDL_SetTextureBlendMode(m_pTexture, SDL_BLENDMODE_NONE); // no alpha blending - we will implement this ourselves; this effectively ignores the value of the alpha channel in the pixel color
 
     // Raw buffer
-    m_pixels = std::vector<ColorRGB>(m_WIDTH * m_HEIGHT);    
+    m_pixels = std::vector<ColorRGB>(m_WIDTH * m_HEIGHT);
+
+    // Initialize rasterizers
+    m_pLineRasterizer = std::make_unique<BresenhamsLineRasterizer>(this);
+    // m_pTriangleRasterizer = std::make_unique<LerpTriangleRasterizer>(this, m_pLineRasterizer.get());
+    {
+        std::unique_ptr<BarycentricTriangleRasterizer> btr(new BarycentricTriangleRasterizer(this));
+        btr->UpdateScreenResolution(m_WIDTH, m_HEIGHT);
+        m_pTriangleRasterizer = std::move(btr);
+    }
 
     trclog("\tRenderer initialized.");
 
