@@ -15,8 +15,8 @@ public:
     virtual void FillScreenBackground (ColorRGB color=Color::Black) = 0;
 
     // Basic drawing routines
-    virtual void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color);
-    virtual void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color);
+    virtual void DrawLine (uint x_s, uint y_s, uint x_e, uint y_e, ColorRGB color) = 0;
+    virtual void DrawTriangle (uint x0, uint y0, uint x1, uint y1, uint x2, uint y2, ColorRGB color) = 0;
 
     /**
      * Should be invoked once a frame of pixels is ready to be sent to a video device.

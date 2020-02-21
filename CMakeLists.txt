@@ -17,7 +17,6 @@ add_executable(pen31ope
     main.cpp
     Game.cpp
     Common/Chrono.cpp
-    Core/IRenderer.cpp
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
     Math/Vector3.cpp
