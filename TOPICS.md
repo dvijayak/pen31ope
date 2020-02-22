@@ -21,6 +21,8 @@
 - Barycentric coordinates
    - Triangle rasterizing
    - Z-buffer
+- Templated math library for applicable elements
+   - Vectors
 
 
 # To Learn
@@ -45,7 +47,6 @@ This serves as a high-level TODO list, in no particular order.
    - Identity
    - Inverse
 - Templated math library for applicable elements
-   - Vectors
    - Matrices
 - Quaternions
 - Transformations

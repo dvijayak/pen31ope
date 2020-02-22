@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-#include "Vector3.hpp"
+#include "Vector.hpp"
 #include "Interpolate.hpp"
 
 /**
@@ -27,7 +27,8 @@ public:
 
 void LerpLineRasterizer::DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color)
 {
-   float x_s = from.x(), x_e = to.x(), y_s = from.y(), y_e = to.y();
+   // Absolutely MUST cast to integral type, otherwise line will have holes due to floating-point rounding
+   uint x_s = from.x, x_e = to.x, y_s = from.y, y_e = to.y;
 
    int dx = x_e - x_s;
    int dy = y_e - y_s;

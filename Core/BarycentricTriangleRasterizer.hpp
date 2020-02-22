@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include "Vector3.hpp"
+#include "Vector.hpp"
 #include "Box.hpp"
 #include "Triangle.hpp"
 
@@ -53,7 +53,7 @@ void BarycentricTriangleRasterizer::DrawTriangle (Vector3 const& v0, Vector3 con
       {
          Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), vertices);
 
-         float u = baryCoords.x(), v = baryCoords.y(), w = baryCoords.z();
+         float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z;
          if (u >= 0 && v >= 0 && w >= 0)
          {
             if (m_zBuffer.empty())
@@ -62,7 +62,7 @@ void BarycentricTriangleRasterizer::DrawTriangle (Vector3 const& v0, Vector3 con
             }
             else
             {
-               float z = u * v0.z() + v * v1.z() + w * v2.z();
+               float z = u * v0.z + v * v1.z + w * v2.z;
                uint index = y * m_zBufferWidth + x;
                if (z >= m_zBuffer[index])
                {

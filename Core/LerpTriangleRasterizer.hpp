@@ -12,7 +12,7 @@
 #include <functional>
 
 #include "Interpolate.hpp"
-#include "Vector3.hpp"
+#include "Vector.hpp"
 
 class LerpTriangleRasterizer
    : virtual public Rasterizer
@@ -37,16 +37,16 @@ void LerpTriangleRasterizer::DrawTriangle (Vector3 const& v0, Vector3 const& v1,
 
    // Sort vertices by y-component in ascending order (since y increases downwards) and by x-component in ascending order
    std::sort(vertices.begin(), vertices.end(), [](auto const& a, auto const& b) {
-      return int(a.y()) == int(b.y()) ? (a.x() < b.x()) : (a.y() < b.y());
+      return int(a.y) == int(b.y) ? (a.x < b.x) : (a.y < b.y);
    });
 
    // For convenience, we assume the following edge labeling scheme:
    //    AB = vertices[0], vertices[1]
    //    BC = vertices[1], vertices[2]
    //    AC = vertices[0], vertices[2]
-   uint x_A = vertices[0].x(), y_A = vertices[0].y();
-   uint x_B = vertices[1].x(), y_B = vertices[1].y();
-   uint x_C = vertices[2].x(), y_C = vertices[2].y();
+   uint x_A = vertices[0].x, y_A = vertices[0].y;
+   uint x_B = vertices[1].x, y_B = vertices[1].y;
+   uint x_C = vertices[2].x, y_C = vertices[2].y;
 
    float dy_AB = float(y_B - y_A);
    float dy_BC = float(y_C - y_B);

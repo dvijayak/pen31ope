@@ -8,7 +8,7 @@
 #include <algorithm>
 // #include <type_traits>
 
-#include "Vector3.hpp"
+#include "Vector.hpp"
 #include "Box.hpp"
 
 class Triangle
@@ -41,26 +41,26 @@ public:
     static Box2UInt MinimumBoundingBox (std::array<Vector3, 3> const& vertices)
     {
         // TODO: Assume yAxis increases downwards
-        float x_min = vertices[0].x(), y_min = vertices[0].y();
+        float x_min = vertices[0].x, y_min = vertices[0].y;
         float x_max = x_min, y_max = y_min;
 
         for (auto const& v : vertices)
         {
-            if (v.x() < x_min)
+            if (v.x < x_min)
             {
-                x_min = v.x();
+                x_min = v.x;
             }
-            if (v.x() > x_max)
+            if (v.x > x_max)
             {
-                x_max = v.x();
+                x_max = v.x;
             }
-            if (v.y() < y_min)
+            if (v.y < y_min)
             {
-                y_min = v.y();
+                y_min = v.y;
             }
-            if (v.y() > y_max)
+            if (v.y > y_max)
             {
-                y_max = v.y();
+                y_max = v.y;
             }
         }
 
@@ -85,22 +85,21 @@ public:
          */     
 
         // Calculate cross product of edge vectors
-        Vector3 u = Vector3(
-            vertices[1].x() - vertices[0].x(),
-            vertices[2].x() - vertices[0].x(),
-            vertices[0].x() - p.x()
-        )
-        .Cross(Vector3(
-            vertices[1].y() - vertices[0].y(),
-            vertices[2].y() - vertices[0].y(),
-            vertices[0].y() - p.y()
+        Vector3 u = Cross(Vector3(
+            vertices[1].x - vertices[0].x,
+            vertices[2].x - vertices[0].x,
+            vertices[0].x - p.x
+        ), Vector3(
+            vertices[1].y - vertices[0].y,
+            vertices[2].y - vertices[0].y,
+            vertices[0].y - p.y
         ));
 
         // Compute the coefficients of the barycentric linear combination
         return Vector3(
-            1.f - ((u.x() + u.y()) / u.z()),
-            u.y() / u.z(),
-            u.x() / u.z()
+            1.f - ((u.x + u.y) / u.z),
+            u.y / u.z,
+            u.x / u.z
         ); // I don't really understand what's going on here, but this is courtesy of ssloy: https://github.com/ssloy/tinyrenderer/wiki/Lesson-2-Triangle-rasterization-and-back-face-culling
     }
 };

@@ -37,7 +37,7 @@ int Game::Run ()
     m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/african_head.obj")));
     // m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/diablo_pose.obj")));
 
-    m_lights.push_back(Vector3::Backward.Normalized());
+    m_lights.push_back(Normalized(Vector3::Backward));
 
     //// Game loop ////
     
@@ -115,7 +115,7 @@ bool Game::ProcessEvents ()
                 {
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
-                    m_lights[0] = (m_lights[0] + (Vector3::Left * movement)).Normalized();
+                    m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
                 }
                 break;
             case SDL_MOUSEMOTION:
@@ -133,9 +133,9 @@ bool Game::ProcessEvents ()
 Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
 {
     return Vector3(
-        (v.x() + 1.f) * 0.5f * m_screenWidth,
-        (v.y() * -1.f + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
-        v.z()
+        (v.x + 1.f) * 0.5f * m_screenWidth,
+        (v.y * -1.f + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
+        v.z
         );
 }
 
@@ -150,7 +150,7 @@ void Game::DrawWorld (float dt)
         if (!obj) continue;
         for (auto const& face : obj->GetFaces())
         {
-            float intensity = m_lights[0].Dot(face.Normal());
+            float intensity = Dot(m_lights[0], face.Normal());
 
             // Back-face culling
             if (intensity >= 0) continue;

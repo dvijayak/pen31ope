@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "Logger.hpp"
+#include "LerpLineRasterizer.hpp"
 #include "BresenhamsLineRasterizer.hpp"
 #include "LerpTriangleRasterizer.hpp"
 #include "BarycentricTriangleRasterizer.hpp"
@@ -24,6 +25,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
         width,
         height,
         SDL_WINDOW_RESIZABLE
+        // SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         );
 
     m_WIDTH = width;
@@ -46,6 +48,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
     m_pixels = std::vector<ColorRGB>(m_WIDTH * m_HEIGHT);
 
     // Initialize rasterizers
+    // m_pLineRasterizer = std::make_unique<LerpLineRasterizer>(this);
     m_pLineRasterizer = std::make_unique<BresenhamsLineRasterizer>(this);
     // m_pTriangleRasterizer = std::make_unique<LerpTriangleRasterizer>(this, m_pLineRasterizer.get());
     {

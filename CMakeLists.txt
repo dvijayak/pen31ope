@@ -19,7 +19,6 @@ add_executable(pen31ope
     Common/Chrono.cpp
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
-    Math/Vector3.cpp
     )
 target_link_libraries(pen31ope ${SDL2_LIBS})
 

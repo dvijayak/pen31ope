@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "IRenderer.hpp"
-#include "Vector3.hpp"
+#include "Vector.hpp"
 
 class Mesh;
 

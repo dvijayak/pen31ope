@@ -96,7 +96,7 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
 
             // Create the face from the vertices, compute surface normal, etc.
             face_type triangle(expandedFaces);            
-            triangle.m_normal = Vector3(triangle[0], triangle[1]).Cross(Vector3(triangle[0], triangle[2])).Normalized();
+            triangle.m_normal = Normalized(Cross(triangle[1] - triangle[0], triangle[2] - triangle[0]));            
             pMesh->m_faces.push_back(triangle);
         }
         return pMesh;

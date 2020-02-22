@@ -11,7 +11,7 @@
 #include "SDL.h"
 
 #include "Color.hpp"
-#include "Vector3.hpp"
+#include "Vector.hpp"
 #include "ILineRasterizer.hpp"
 #include "ITriangleRasterizer.hpp"
 

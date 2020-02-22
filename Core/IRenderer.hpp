@@ -4,7 +4,7 @@
 #include "global.hpp"
 #include "Color.hpp"
 
-class Vector3;
+#include "Vector.hpp"
 
 class IRenderer
 {

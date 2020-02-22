@@ -20,7 +20,7 @@ public:
 
 void BresenhamsLineRasterizer::DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color)
 {
-   float x_s = from.x(), x_e = to.x(), y_s = from.y(), y_e = to.y();
+   float x_s = from.x, x_e = to.x, y_s = from.y, y_e = to.y;
 
    int dx = x_e - x_s; // using a signed int is critical because we want to preserve negative deltas and NOT have integer overflow
    int dy = y_e - y_s; // we also use int instead of float to avoid floating point comparison shenanigans

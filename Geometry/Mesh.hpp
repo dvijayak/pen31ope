@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include "Vector3.hpp"
+#include "Vector.hpp"
 #include "IRenderer.hpp"
 #include "Triangle.hpp"
 
