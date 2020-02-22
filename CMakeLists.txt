@@ -13,6 +13,7 @@ include_directories(${SDL2_INCLUDE_DIRS}
     "Core"
     "Geometry"
     "Math"
+    "Scene"
 )
 add_executable(pen31ope
     main.cpp
@@ -20,6 +21,8 @@ add_executable(pen31ope
     Common/Chrono.cpp
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
+    Scene/Object3D.cpp
+    Scene/Object3DFactory.cpp
     )
 target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS})
 

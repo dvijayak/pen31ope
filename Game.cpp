@@ -35,8 +35,8 @@ int Game::Run ()
 {
     //// Create some test objects ////
 
-    m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/african_head.obj")));
-    // m_objects.push_back(std::move(Mesh::MakeFromOBJ("models/diablo_pose.obj")));
+    m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
+    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj"));
 
     m_lights.push_back(Normalized(Vector3::Backward));
 
@@ -149,7 +149,7 @@ void Game::DrawWorld (float dt)
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
-        for (auto const& face : obj->GetFaces())
+        for (auto const& face : obj->Mesh()->GetFaces())
         {
             float intensity = Dot(m_lights[0], face.Normal());
 

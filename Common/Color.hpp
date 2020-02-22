@@ -14,6 +14,18 @@ typedef uint32_t ColorRGB; // includes alpha channel
 class Color
 {
 public:
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        static constexpr uint32_t R_MASK = 0xff000000;
+        static constexpr uint32_t G_MASK = 0x00ff0000;
+        static constexpr uint32_t B_MASK = 0x0000ff00;
+        static constexpr uint32_t A_MASK = 0x000000ff;
+    #else
+        static constexpr uint32_t R_MASK = 0x000000ff;
+        static constexpr uint32_t G_MASK = 0x0000ff00;
+        static constexpr uint32_t B_MASK = 0x00ff0000;
+        static constexpr uint32_t A_MASK = 0xff000000;
+    #endif
+
     static constexpr ColorRGB Black         = 0;
     static constexpr ColorRGB White         = 0xFFFFFF00;
     static constexpr ColorRGB Red           = 0xFF000000;

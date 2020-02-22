@@ -7,8 +7,7 @@
 
 #include "IRenderer.hpp"
 #include "Vector.hpp"
-
-class Mesh;
+#include "Object3DFactory.hpp"
 
 class Game
 {
@@ -63,7 +62,8 @@ private:
     float m_screenWidth;
     float m_screenHeight;
 
-    std::vector<std::unique_ptr<Mesh>> m_objects;
+    Object3DFactory m_objectFactory;
+    std::vector<Object3D*> m_objects;
     std::vector<Vector3> m_lights;
 };
 

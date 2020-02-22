@@ -105,8 +105,8 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     {
         // On error, just quit
         std::cerr << "Encountered error when reading file " << fileName << std::endl;
-        return 0;
+        return nullptr;
     }
 
-    return 0;
+    return nullptr;
 }
