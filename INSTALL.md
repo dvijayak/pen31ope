@@ -9,7 +9,8 @@
 ## Basic Prerequisites
 
 1. CMake 3.16+.
-2. SDL2 (platform-specific instructions for acquiring are given below)
+2. SDL2, including supplemental libraries: (platform-specific instructions for acquiring are given below)
+   - SDL2_Image
 3. C++ compiler that is highly compliant with the C++14 or higher standard.
    - Need at minimum `std::make_unique` support.
 
@@ -21,6 +22,8 @@ SDL2 version 2.0.10 is already version-controlled in this repo, so nothing furth
 
 1. Download the _MSVC (Visual C++)_ **development libraries** from the SDL2 [download page](https://www.libsdl.org/download-2.0.php) to an arbitrary location. MinGW is not currently supported.
 2. Unzip the zip archive and copy the `lib`, `include` and `COPYING.txt` files/folders to `3rdParty/SDL2/Windows/`. This is the location in which CMake searches to find SDL2 on Windows.
+
+#### TODO: SDL2_Image
 
 ### Build & Run
 
@@ -36,6 +39,11 @@ From the project root, run: `cmake -B build`. If you want to use a specific MSVC
 
 1. Download the  **development libraries** from the SDL2 [download page](https://www.libsdl.org/download-2.0.php) to an arbitrary location. This is normally a `.dmg` file.
 2. Open the `.dmg` and copy the `SDL2.framework` package to your desired macOS frameworks directory. Normally, this would be `/Library/Frameworks` but user-specific locations like `~/Library/Frameworks` are fine as well.
+
+#### TODO: SDL2_Image
+
+1. Download the **development libraries** from the SDL2_Image [download page](https://www.libsdl.org/projects/SDL_image/) to an arbitrary location. This should also be a `.dmg` file.
+2. Open the `.dmg` and copy the `SDL2_Image.framework` package to the same macOS frameworks directory as done earlier.
 
 ### Build
 

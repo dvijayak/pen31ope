@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/Library/Frameworks/SDL2.framework/Headers"
+                "/Library/Frameworks/SDL2.framework/Headers",
+                "/Library/Frameworks/SDL2_Image.framework/Headers"
             ],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks",

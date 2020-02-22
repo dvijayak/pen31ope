@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cstring>
 
+#include "SDL_image.h"
+
 #include "Logger.hpp"
 #include "LerpLineRasterizer.hpp"
 #include "BresenhamsLineRasterizer.hpp"
@@ -12,8 +14,23 @@
 SDLRenderer::SDLRenderer ()
 {}
 
+static void DumpSDLVersion ()
+{
+    SDL_version compiled;
+    SDL_version linked;
+
+    SDL_VERSION(&compiled);
+    SDL_GetVersion(&linked);
+
+    std::cout << "We compiled against SDL version " << compiled.major << ", " << compiled.minor << ", " << compiled.patch << std::endl;
+    std::cout << "We are linking against SDL version " << linked.major << ", " << linked.minor << ", " << linked.patch << std::endl;
+}
+
 void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
 {
+    // TODO: Doesn't show the version, not sure why
+    // DumpSDLVersion();
+
     trclog("Initializing SDL...");
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -59,6 +76,15 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
 
     trclog("\tRenderer initialized.");
 
+    // Init JPG and PNG support for SDL_Image
+    int sdlImgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+    int sdlImgInitResult = IMG_Init(sdlImgFlags);
+    if ((sdlImgInitResult & sdlImgFlags) != sdlImgFlags)
+    {
+        trclog("\tFailed to initialize PNG and JPG image support. IMG_Init error: ") << IMG_GetError();
+        // TODO: Set a flag so that renderer does not do things that require PNG/JPG support
+    }
+
     trclog("SDL initialization complete.");
 }
 
@@ -75,6 +101,7 @@ SDLRenderer::~SDLRenderer ()
 
     trclog("\tRenderer destroyed.");
 
+    IMG_Quit();
     SDL_Quit();
 
     trclog("SDL shutdown complete.");
