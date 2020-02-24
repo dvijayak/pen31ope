@@ -13,12 +13,11 @@
 template <typename T>
 std::ostream & operator<< (std::ostream & os, std::vector<T> const& v)
 {
-   os << "{ ";
-   std::for_each(v.begin(), v.end(), [&](T const& t) {
-      os << t;
-      os << ", ";
-   });
-   os << " }";
+   os << "{";
+   int n = v.size();
+   for (int i = 0; i < n; ++i)
+      os << v[i] << (i < n-1 ? ", " : "");
+   os << "}";
    return os;
 }
 

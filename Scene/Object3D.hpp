@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Mesh.hpp"
+#include "Color.hpp"
 
 struct TextureData
 {
@@ -50,11 +51,17 @@ public:
    uint Id () const { return m_id; }
 
    /**
-    * While the handle to the mesh can't be changed, no limits on modifying the mesh itself are imposed
+    * Until necessary, we won't allow the mesh to be modified by client code
     */ 
-   Mesh* Mesh() const { return m_mesh.get(); }
+   Mesh const* Mesh() const { return m_mesh.get(); }
 
    TextureData const& DiffuseTexture () const { return m_diffuseTextureData; }
+
+   /**
+    * Map a normalized diffuse texture uv coordinate to the corresponding pixel color
+    */
+   ColorRGB DiffuseColorFromTexture (float const u, float const v) const;
+   inline ColorRGB DiffuseColorFromTexture (Vector2 const& uv) const { return DiffuseColorFromTexture(uv.x, uv.y); }
 };
 
 #endif

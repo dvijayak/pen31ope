@@ -116,6 +116,7 @@ class Vector<Numeric, 2>
 {
    static_assert(std::is_arithmetic<Numeric>::value, "Vectors can only contain numeric/arithmetic types, i.e. integers and floating-point numbers");
 
+public:
    Numeric x, y;
 
    static Vector<Numeric, 2> Up;
@@ -123,7 +124,6 @@ class Vector<Numeric, 2>
    static Vector<Numeric, 2> Left;
    static Vector<Numeric, 2> Right;
 
-public:
    explicit Vector (Numeric const _x=0, Numeric const _y=0)
       : x(_x), y(_y)
    {}
@@ -166,9 +166,9 @@ class Vector<Numeric, 4>
 {
    static_assert(std::is_arithmetic<Numeric>::value, "Vectors can only contain numeric/arithmetic types, i.e. integers and floating-point numbers");
 
+public:
    Numeric x, y, z, w;
 
-public:
    explicit Vector (Numeric const _x=0, Numeric const _y=0, Numeric const _z = 0, Numeric const _w=0)
       : x(_x), y(_y), z(_z), w(_w)
    {}

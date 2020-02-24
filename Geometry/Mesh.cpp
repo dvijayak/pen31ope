@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "Util.hpp"
+
 static std::vector<std::string> split (std::string const& s, char delim)
 {
     std::vector<std::string> tokens;
@@ -33,7 +35,13 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     }
 
     std::vector<Vector3> vertices;
-    std::vector<std::array<uint, 3>> faces;
+    std::vector<Vector2> vertexTextureCoords;
+    struct FaceDef
+    {
+        std::array<uint, 3> vertexIds;
+        std::array<uint, 3> vtIds;
+    };
+    std::vector<FaceDef> faces;
 
     // Read each line
     const uint bufSize = 1024;
@@ -44,11 +52,12 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
 
         // Tokenize line by space
         std::vector<std::string> tokens = split(buf, ' ');
+        tokens.erase(std::remove(tokens.begin(), tokens.end(), ""), tokens.end());
         if (!tokens.empty())
         {
-            std::string const& first = tokens[0];
+            auto const& first = tokens[0];
 
-            // Handle vertex definition
+            // Vertex definition
             if (first == "v")
             {
                 if (tokens.size() > 3)
@@ -63,19 +72,42 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
                 }
 
             }
-            // Handle face definition
+            // Texture coordinates
+            else if (first == "vt")
+            {
+                if (tokens.size() > 3)
+                {
+                    float uv[2];
+                    for (int i = 0; i < 2; i++)
+                    {
+                        std::stringstream ss(tokens[i + 1]);
+                        ss >> uv[i];
+                    }
+                    vertexTextureCoords.push_back(Vector2(uv[0], uv[1]));
+                }
+            }
+            // Face definition
             else if (first == "f")
             {
                 if (tokens.size() > 3)
                 {
                     std::array<uint, 3> vertices;
+                    std::array<uint, 3> textureCoords;
                     for (int i = 0; i < 3; i++)
                     {
                         std::vector<std::string> faceTokens = split(tokens[i + 1], '/');
-                        std::stringstream ss(faceTokens[0]); // only care about the vertex index for now
-                        ss >> vertices[i];
+                        // only care about the vertex index and vt for now
+                        {
+                            std::stringstream ss(faceTokens[0]);
+                            ss >> vertices[i];
+                        }
+                        if (faceTokens[1] != "")
+                        {
+                            std::stringstream ss(faceTokens[1]);
+                            ss >> textureCoords[i];
+                        }
                     }
-                    faces.push_back(vertices);
+                    faces.push_back({vertices, textureCoords});
                 }
             }
             // Ignore everything else
@@ -86,17 +118,20 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     {
         // On EOF, prepare the Mesh object and quit
         auto pMesh = std::make_unique<Mesh>();
-        for (auto const& face : faces)
+        for (auto const& faceDef : faces)
         {
-            Triangle::vertices_type expandedFaces;
+            Triangle::vertices_type expandedVertices;
+            Triangle::uvs_type expandedVTs;
             for (int i = 0; i < 3; i++)
             {
-                expandedFaces[i] = vertices[face[i] - 1]; // OBJ file indices start from 1, so compensate
+                expandedVertices[i] = vertices[faceDef.vertexIds[i] - 1]; // OBJ file indices start from 1, so compensate
+                expandedVTs[i] = vertexTextureCoords[faceDef.vtIds[i] - 1];
             }
 
             // Create the face from the vertices, compute surface normal, etc.
-            face_type triangle(expandedFaces);            
+            face_type triangle(expandedVertices);
             triangle.m_normal = Normalized(Cross(triangle[1] - triangle[0], triangle[2] - triangle[0]));            
+            triangle.m_vertexUVs = expandedVTs;
             pMesh->m_faces.push_back(triangle);
         }
         return pMesh;

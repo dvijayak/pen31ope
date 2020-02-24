@@ -15,9 +15,11 @@ class Triangle
 {
 public:
     typedef std::array<Vector3, 3> vertices_type;
+    typedef std::array<Vector2, 3> uvs_type;
 
 private:
     vertices_type m_vertices;
+    uvs_type m_vertexUVs;
     Vector3 m_normal;
 
     friend class Mesh;
