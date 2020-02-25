@@ -14,7 +14,7 @@ struct TextureData
    /**
     * Should support 24-bit color values
     */
-   std::vector<uint> pixels;
+   std::vector<ColorRGB> pixels;   
 };
 
 /**

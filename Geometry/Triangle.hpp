@@ -33,6 +33,9 @@ public:
     }
 
     Vector3 const& Normal () const { return m_normal; }
+
+    // TODO: REMOVE?
+    uvs_type const& UVs () const { return m_vertexUVs; }
 };
 
 class TriangleUtil
@@ -76,7 +79,9 @@ public:
     // Vector3 BarycentricCoordinates (std::array<NumericType, 3> vertices)
     // TODO: Need Vector2 of UInt???
     // TODO: This function is a hotspot. The many Vector3 constructions isn't good.
-    static Vector3 BarycentricCoordinates (Vector3 const& p, std::array<Vector3, 3> const&  vertices)
+    template <typename IndexableTriangle>
+    static Vector3 BarycentricCoordinates (Vector3 const& p, IndexableTriangle const& vertices)
+    // static Vector3 BarycentricCoordinates (Vector3 const& p, std::array<Vector3, 3> const&  vertices)
     {
         /*
          * Label as follows:
@@ -100,8 +105,8 @@ public:
         // Compute the coefficients of the barycentric linear combination
         return Vector3(
             1.f - ((u.x + u.y) / u.z),
-            u.y / u.z,
-            u.x / u.z
+            u.x / u.z,
+            u.y / u.z
         ); // I don't really understand what's going on here, but this is courtesy of ssloy: https://github.com/ssloy/tinyrenderer/wiki/Lesson-2-Triangle-rasterization-and-back-face-culling
     }
 };

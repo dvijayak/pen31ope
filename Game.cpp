@@ -36,7 +36,7 @@ int Game::Run ()
     //// Create some test objects ////
 
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
-    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj"));
+    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));
 
     m_lights.push_back(Normalized(Vector3::Backward));
 
@@ -140,15 +140,87 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
         );
 }
 
+// TODO: REMOVE once PoC has been properly implemented
+class POC_TextureMapper
+{
+private:
+    std::vector<float> m_zBuffer;
+    IRenderer* m_pRenderer;
+    uint m_zBufferWidth;
+
+public:
+    POC_TextureMapper(IRenderer* pRenderer, uint width, uint height)
+        : m_pRenderer(pRenderer)
+        , m_zBufferWidth(width)
+    {
+        m_zBuffer = std::vector<float>(width * height, std::numeric_limits<float>::lowest()); 
+    }
+
+    void DrawTriangle (std::array<Vector3, 3> const& vertices, std::array<Vector2, 3> const& uvs, Object3D* object, ColorRGB alternateColor, float intensity)
+    {
+        auto const boundingBox = TriangleUtil::MinimumBoundingBox(vertices);
+   
+        uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
+        uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
+        for (uint x = x_start; x <= x_end; ++x)
+        {
+            for (uint y = y_start; y <= y_end; ++y)
+            {
+                Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), vertices);
+
+                float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z;
+                if (u >= 0 && v >= 0 && w >= 0)
+                {
+                    Vector2 interpolatedUV(
+                        u * uvs[0].x + v * uvs[1].x + w * uvs[2].x,
+                        u * (1.f - uvs[0].y) + v * (1.f - uvs[1].y) + w * (1.f - uvs[2].y)
+                    );
+                    ColorRGB diffuseColor = Color::Intensify(object->DiffuseColorFromTexture(interpolatedUV), intensity, 1.f);
+                    // ColorRGB diffuseColor = object->DiffuseColorFromTexture(interpolatedUV);
+                    if (m_zBuffer.empty())
+                    {
+                        m_pRenderer->SetPixel(x, y, diffuseColor);
+                        // m_pRenderer->SetPixel(x, y, alternateColor);
+                    }
+                    else
+                    {
+                        float z = u * vertices[0].z + v * vertices[1].z + w * vertices[2].z;
+                        uint index = y * m_zBufferWidth + x;
+                        if (z >= m_zBuffer[index])
+                        {
+                            m_zBuffer[index] = z;
+                            m_pRenderer->SetPixel(x, y, diffuseColor);
+                            // m_pRenderer->SetPixel(x, y, alternateColor);
+                        }
+                    }   
+                }
+            }
+        }
+    }
+};
+POC_TextureMapper* s_textureMapperPOC = nullptr;
+
 void Game::DrawWorld (float dt)
 {
     // TODO: Use the normalized lag dt to produce a more accurate render
+    if (s_textureMapperPOC == nullptr)
+    {
+        s_textureMapperPOC = new POC_TextureMapper(m_pRenderer, m_screenWidth, m_screenHeight);
+    }
 
     ColorRGB color = Color::White;
     
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
+
+        // // TODO :TEST
+        // for (int i = 0; i < 1024; i++)
+        //     for (int j = 0; j < 1024; j++)
+        //         m_pRenderer->SetPixel(i, j, obj->DiffuseColorFromTexture(
+        //             float(i)/1024, float(j)/1024
+        //             ));
+
         for (auto const& face : obj->Mesh()->GetFaces())
         {
             float intensity = Dot(m_lights[0], face.Normal());
@@ -160,7 +232,8 @@ void Game::DrawWorld (float dt)
             Vector3 v0 = NDCToScreenPixels(face[0]);
             Vector3 v1 = NDCToScreenPixels(face[1]);
             Vector3 v2 = NDCToScreenPixels(face[2]);
-            m_pRenderer->DrawTriangle(v0, v1, v2, intensifiedColor);
+            // m_pRenderer->DrawTriangle(v0, v1, v2, intensifiedColor);
+            s_textureMapperPOC->DrawTriangle(std::array<Vector3, 3>{v0, v1, v2}, face.UVs(), obj, intensifiedColor, -intensity);            
         }
     }
 

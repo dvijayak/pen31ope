@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+#include "Util.hpp"
+
 uint Object3DFactory::s_appWideNextAvailableObjectId = 1;
 
 Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, std::string const& diffuseTextureFilename)
@@ -22,6 +24,7 @@ Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, s
       return nullptr;
    }
 
+   // TODO: Tight dependency with SDL library. Should abstract the SDL part out
    // Load textures
    SDL_Surface* pDiffuseTextureImage = IMG_Load(diffuseTextureFilename.c_str());
    if (!pDiffuseTextureImage)
@@ -31,28 +34,24 @@ Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, s
    }
    else
    {
-      std::cout << "Original pixel format: " << SDL_GetPixelFormatName(pDiffuseTextureImage->format->format) << std::endl;
-      constexpr Uint32 targetPixelFormat = SDL_PIXELFORMAT_RGBA8888; // pixel format MUST match that which is set in SDLRenderer.cpp for the main texture, for convenience
-      std::cout << "Target pixel format: " << SDL_GetPixelFormatName(targetPixelFormat) << std::endl;
+      TextureData textureData;
+      textureData.width = pDiffuseTextureImage->w;
+      textureData.height = pDiffuseTextureImage->h;
 
-      // First, convert to our desired pixel format which is straight up RGBA
-      SDL_Surface* pConvertedImage = SDL_ConvertSurfaceFormat(pDiffuseTextureImage, targetPixelFormat, 0); // last arg (flags) unused, according to SDL docs
-      if (pConvertedImage == nullptr)
+      // Extract raw pixel data
+      size_t totalPixels = textureData.width * textureData.height;
+      textureData.pixels = std::vector<uint>(totalPixels);      
+      for (size_t i = 0; i < totalPixels; ++i)
       {
-         std::cerr << "Failed to convert diffuse image to desired pixel format; SDL error: " << SDL_GetError() << std::endl;
+         Uint32 color = reinterpret_cast<Uint32*>(pDiffuseTextureImage->pixels)[i];
+         Uint8 r, g, b;
+         SDL_GetRGB(color, pDiffuseTextureImage->format, &r, &g, &b);
+         ColorRGB finalColor = Color::Mix(r, g, b);
+         textureData.pixels[i] = finalColor;
       }
-      else
-      {
-         // Now we can create the texture data structure and extract the raw pixels
-         TextureData textureData;
-         textureData.width = pDiffuseTextureImage->w;
-         textureData.height = pDiffuseTextureImage->h;
-         textureData.pixels = std::vector<uint>(textureData.width * textureData.height);
-         *(textureData.pixels.data()) = *(reinterpret_cast<uint*>(pConvertedImage->pixels));
-         pObject->m_diffuseTextureData = textureData;
 
-         SDL_FreeSurface(pConvertedImage);
-      }
+      // Texture data preparation complete
+      pObject->m_diffuseTextureData = std::move(textureData);
 
       SDL_FreeSurface(pDiffuseTextureImage);
    }
