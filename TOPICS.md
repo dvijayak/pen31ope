@@ -16,6 +16,7 @@
       - Magnitude
       - Normalizing
 - Flat shading
+- Gouraud shading
 - Gamma correction
 - Hidden faces removal via Z-Buffer
 - Barycentric coordinates
@@ -64,7 +65,6 @@ This serves as a high-level TODO list, in no particular order.
 - Texture mapping
 - Anti-aliasing
 - Perspective correct interpolation
-- Gauraud shading
 - Phong shading
 - Normal mapping
    - Object space

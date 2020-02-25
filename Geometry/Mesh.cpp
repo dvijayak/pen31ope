@@ -37,10 +37,12 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
 
     std::vector<Vector3> vertices;
     std::vector<Vector2> vertexTextureCoords;
+    std::vector<Vector3> vertexNormals;
     struct FaceDef
     {
         std::array<uint, 3> vertexIds;
         std::array<uint, 3> vtIds;
+        std::array<uint, 3> vnIds;
     };
     std::vector<FaceDef> faces;
 
@@ -87,6 +89,20 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
                     vertexTextureCoords.push_back(Vector2(uv[0], uv[1]));
                 }
             }
+            // Vertex normals
+            else if (first == "vn")
+            {
+                if (tokens.size() > 3)
+                {
+                    float normals[3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        std::stringstream ss(tokens[i + 1]);
+                        ss >> normals[i];
+                    }
+                    vertexNormals.push_back(Vector3(normals[0], normals[1], normals[2]));
+                }
+            }
             // Face definition
             else if (first == "f")
             {
@@ -94,10 +110,10 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
                 {
                     std::array<uint, 3> vertices;
                     std::array<uint, 3> textureCoords;
+                    std::array<uint, 3> normals;
                     for (int i = 0; i < 3; i++)
                     {
-                        std::vector<std::string> faceTokens = split(tokens[i + 1], '/');
-                        // only care about the vertex index and vt for now
+                        std::vector<std::string> faceTokens = split(tokens[i + 1], '/');                        
                         {
                             std::stringstream ss(faceTokens[0]);
                             ss >> vertices[i];
@@ -107,8 +123,13 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
                             std::stringstream ss(faceTokens[1]);
                             ss >> textureCoords[i];
                         }
+                        if (faceTokens[2] != "")
+                        {
+                            std::stringstream ss(faceTokens[2]);
+                            ss >> normals[i];
+                        }
                     }
-                    faces.push_back({vertices, textureCoords});
+                    faces.push_back({vertices, textureCoords, normals});
                 }
             }
             // Ignore everything else
@@ -124,9 +145,10 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
             Triangle::vertices_type expandedVertices;
             for (int i = 0; i < 3; i++)
             {
-                // OBJ file indices start from 1, so we compensate
+                // OBJ file indices start from 1, so we have to compensate
                 expandedVertices[i].m_xyz = vertices[faceDef.vertexIds[i] - 1];
                 expandedVertices[i].m_uv =  vertexTextureCoords[faceDef.vtIds[i] - 1];
+                expandedVertices[i].m_normal = vertexNormals[faceDef.vnIds[i] - 1];
             }
 
             // Create the face from the vertices, compute surface normal, etc.

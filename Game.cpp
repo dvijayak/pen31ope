@@ -195,9 +195,16 @@ void Game::DrawWorld (float dt)
                         // Get color from diffuse map
                         ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : Color::White;
 
+                        // Gouraud shading: interpolate normal and compute lighting intensity
+                        float intensity0 = Dot(m_lights[0], face[0].normal());
+                        float intensity1 = Dot(m_lights[0], face[1].normal());
+                        float intensity2 = Dot(m_lights[0], face[2].normal());
+                        float pixelIntensity = u * intensity0 + v * intensity1 + w * intensity2;
+
                         // Apply lighting intensity modifier
-                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity);
-                        // ColorRGB intensifiedColor = diffuseColor;
+                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
+                        // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity); // flat shading
+                        // ColorRGB intensifiedColor = diffuseColor; // no shading
 
                         // Handle z-buffer
                         if (m_zBuffer.empty())

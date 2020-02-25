@@ -21,7 +21,7 @@ public:
         {
             Vector3 m_xyz;
             Vector2 m_uv;
-            // Later: vertex normal
+            Vector3 m_normal;
 
             friend class Mesh;
 
@@ -30,6 +30,7 @@ public:
 
             Vector3 const& xyz () const { return m_xyz; }
             Vector2 const& uv () const { return m_uv; }
+            Vector3 const& normal () const { return m_normal; }
         };
 
         typedef std::array<Vertex, 3> vertices_type;
