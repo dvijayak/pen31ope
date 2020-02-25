@@ -22,6 +22,7 @@ static std::vector<std::string> split (std::string const& s, char delim)
     return std::move(tokens);
 }
 
+// TODO: Should separate into a MeshLoader interface
 std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
 {
     // Attempt to open file
@@ -121,17 +122,16 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
         for (auto const& faceDef : faces)
         {
             Triangle::vertices_type expandedVertices;
-            Triangle::uvs_type expandedVTs;
             for (int i = 0; i < 3; i++)
             {
-                expandedVertices[i] = vertices[faceDef.vertexIds[i] - 1]; // OBJ file indices start from 1, so compensate
-                expandedVTs[i] = vertexTextureCoords[faceDef.vtIds[i] - 1];
+                // OBJ file indices start from 1, so we compensate
+                expandedVertices[i].m_xyz = vertices[faceDef.vertexIds[i] - 1];
+                expandedVertices[i].m_uv =  vertexTextureCoords[faceDef.vtIds[i] - 1];
             }
 
             // Create the face from the vertices, compute surface normal, etc.
             face_type triangle(expandedVertices);
-            triangle.m_normal = Normalized(Cross(triangle[1] - triangle[0], triangle[2] - triangle[0]));            
-            triangle.m_vertexUVs = expandedVTs;
+            triangle.m_normal = Normalized(Cross(triangle[1].xyz() - triangle[0].xyz(), triangle[2].xyz() - triangle[0].xyz()));
             pMesh->m_faces.push_back(triangle);
         }
         return pMesh;

@@ -12,6 +12,7 @@
 #include "Chrono.hpp"
 
 #include "Mesh.hpp"
+#include "Triangle.hpp"
 
 constexpr uint MAX_FPS = 240;
 constexpr uint MIN_FPS = 15;
@@ -33,6 +34,9 @@ Game::~Game ()
 
 int Game::Run ()
 {
+    // TODO: I don't like the Z-Buffer data structure being defined in this class...
+    m_zBuffer = std::vector<float>(m_screenWidth * m_screenHeight, std::numeric_limits<float>::lowest()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
+
     //// Create some test objects ////
 
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
@@ -140,74 +144,8 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
         );
 }
 
-// TODO: REMOVE once PoC has been properly implemented
-class POC_TextureMapper
-{
-private:
-    std::vector<float> m_zBuffer;
-    IRenderer* m_pRenderer;
-    uint m_zBufferWidth;
-
-public:
-    POC_TextureMapper(IRenderer* pRenderer, uint width, uint height)
-        : m_pRenderer(pRenderer)
-        , m_zBufferWidth(width)
-    {
-        m_zBuffer = std::vector<float>(width * height, std::numeric_limits<float>::lowest()); 
-    }
-
-    void DrawTriangle (std::array<Vector3, 3> const& vertices, std::array<Vector2, 3> const& uvs, Object3D* object, ColorRGB alternateColor, float intensity)
-    {
-        auto const boundingBox = TriangleUtil::MinimumBoundingBox(vertices);
-   
-        uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
-        uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
-        for (uint x = x_start; x <= x_end; ++x)
-        {
-            for (uint y = y_start; y <= y_end; ++y)
-            {
-                Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), vertices);
-
-                float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z;
-                if (u >= 0 && v >= 0 && w >= 0)
-                {
-                    Vector2 interpolatedUV(
-                        u * uvs[0].x + v * uvs[1].x + w * uvs[2].x,
-                        u * (1.f - uvs[0].y) + v * (1.f - uvs[1].y) + w * (1.f - uvs[2].y)
-                    );
-                    ColorRGB diffuseColor = Color::Intensify(object->DiffuseColorFromTexture(interpolatedUV), intensity, 1.f);
-                    // ColorRGB diffuseColor = object->DiffuseColorFromTexture(interpolatedUV);
-                    if (m_zBuffer.empty())
-                    {
-                        m_pRenderer->SetPixel(x, y, diffuseColor);
-                        // m_pRenderer->SetPixel(x, y, alternateColor);
-                    }
-                    else
-                    {
-                        float z = u * vertices[0].z + v * vertices[1].z + w * vertices[2].z;
-                        uint index = y * m_zBufferWidth + x;
-                        if (z >= m_zBuffer[index])
-                        {
-                            m_zBuffer[index] = z;
-                            m_pRenderer->SetPixel(x, y, diffuseColor);
-                            // m_pRenderer->SetPixel(x, y, alternateColor);
-                        }
-                    }   
-                }
-            }
-        }
-    }
-};
-POC_TextureMapper* s_textureMapperPOC = nullptr;
-
 void Game::DrawWorld (float dt)
 {
-    // TODO: Use the normalized lag dt to produce a more accurate render
-    if (s_textureMapperPOC == nullptr)
-    {
-        s_textureMapperPOC = new POC_TextureMapper(m_pRenderer, m_screenWidth, m_screenHeight);
-    }
-
     ColorRGB color = Color::White;
     
     for (auto&& obj : m_objects)
@@ -225,15 +163,61 @@ void Game::DrawWorld (float dt)
         {
             float intensity = Dot(m_lights[0], face.Normal());
 
-            // Back-face culling
+            // Back-face culling            
             if (intensity >= 0) continue;
             
-            ColorRGB intensifiedColor = Color::Intensify(color, -intensity);
-            Vector3 v0 = NDCToScreenPixels(face[0]);
-            Vector3 v1 = NDCToScreenPixels(face[1]);
-            Vector3 v2 = NDCToScreenPixels(face[2]);
-            // m_pRenderer->DrawTriangle(v0, v1, v2, intensifiedColor);
-            s_textureMapperPOC->DrawTriangle(std::array<Vector3, 3>{v0, v1, v2}, face.UVs(), obj, intensifiedColor, -intensity);            
+            // Transform to screen space, maintaining z-component
+            Vector3 v0 = NDCToScreenPixels(face[0].xyz());
+            Vector3 v1 = NDCToScreenPixels(face[1].xyz());
+            Vector3 v2 = NDCToScreenPixels(face[2].xyz());
+            
+            // Compute minimum rectangle that fully contains the 3 vertices in screen space
+            auto const boundingBox = TriangleUtil::MinimumBoundingBox(v0, v1, v2);
+            uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
+            uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
+
+            // Identify the pixels within the bounds and compute their colour
+            for (uint x = x_start; x <= x_end; ++x)
+            {
+                for (uint y = y_start; y <= y_end; ++y)
+                {
+                    Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), v0, v1, v2);
+                    float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z; // TODO: Rename bary coord names from
+                    if (u >= 0 && v >= 0 && w >= 0)
+                    {
+                        // Interpolate UV
+                        auto const& uv0 = face[0].uv();
+                        auto const& uv1 = face[1].uv();
+                        auto const& uv2 = face[2].uv();
+                        float u_interpolated = u * uv0.x + v * uv1.x + w * uv2.x;
+                        float v_interpolated = u * (1.f - uv0.y) + v * (1.f - uv1.y) + w * (1.f - uv2.y); // subtract y from 1 since y-axis is flipped in screen space
+
+                        // Get color from diffuse map
+                        ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : Color::White;
+
+                        // Apply lighting intensity modifier
+                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity);
+                        // ColorRGB intensifiedColor = diffuseColor;
+
+                        // Handle z-buffer
+                        if (m_zBuffer.empty())
+                        {
+                            m_pRenderer->SetPixel(x, y, intensifiedColor);
+                        }
+                        else
+                        {
+                            // Interpolate z-buffer
+                            float z = u * v0.z + v * v1.z + w * v2.z;
+                            uint index = y * m_screenWidth + x;
+                            if (z >= m_zBuffer[index])
+                            {
+                                m_zBuffer[index] = z;
+                                m_pRenderer->SetPixel(x, y, intensifiedColor);
+                            }
+                        }   
+                    }
+                }
+            }
         }
     }
 

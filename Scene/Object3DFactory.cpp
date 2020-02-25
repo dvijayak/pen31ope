@@ -1,19 +1,20 @@
 #include "Object3DFactory.hpp"
 
-#include "SDL_image.h"
-
-#include "Color.hpp"
-
 #include <cstring>
 
+#include "SDLTextureLoader.hpp"
 #include "Util.hpp"
 
 uint Object3DFactory::s_appWideNextAvailableObjectId = 1;
 
+Object3DFactory::Object3DFactory ()
+{
+   m_pTextureLoader = std::make_unique<SDLTextureLoader>();
+}
+
 Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, std::string const& diffuseTextureFilename)
 {
    std::cout << "Making object: " << objFileName << std::endl;
-   std::cout << "Diffuse Texture: " << diffuseTextureFilename << std::endl;
 
    std::unique_ptr<Object3D> pObject(new Object3D());
 
@@ -24,37 +25,28 @@ Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, s
       return nullptr;
    }
 
-   // TODO: Tight dependency with SDL library. Should abstract the SDL part out
+   // Prepare material
+   bool materialIsUseful = false; // was at least one component of the material successfully loaded?
+   std::unique_ptr<Material> pMaterial(new Material());
+
    // Load textures
-   SDL_Surface* pDiffuseTextureImage = IMG_Load(diffuseTextureFilename.c_str());
-   if (!pDiffuseTextureImage)
+   std::cout << "Diffuse Texture: " << diffuseTextureFilename << std::endl;
+   auto pDiffuseTexture = m_pTextureLoader->LoadFromFile(diffuseTextureFilename);
+   if (pDiffuseTexture != nullptr)
    {
-      std::cerr << "Error loading texture " << diffuseTextureFilename << " due to: " << IMG_GetError() << std::endl;
-      std::cerr << "Proceeding without diffuse texture" << std::endl;
+      materialIsUseful |= true;
+
+      pMaterial->m_diffuseMap = std::move(pDiffuseTexture);
+   }
+
+   if (materialIsUseful)
+   {
+      pObject->m_material = std::move(pMaterial);
    }
    else
    {
-      TextureData textureData;
-      textureData.width = pDiffuseTextureImage->w;
-      textureData.height = pDiffuseTextureImage->h;
-
-      // Extract raw pixel data
-      size_t totalPixels = textureData.width * textureData.height;
-      textureData.pixels = std::vector<uint>(totalPixels);      
-      for (size_t i = 0; i < totalPixels; ++i)
-      {
-         Uint32 color = reinterpret_cast<Uint32*>(pDiffuseTextureImage->pixels)[i];
-         Uint8 r, g, b;
-         SDL_GetRGB(color, pDiffuseTextureImage->format, &r, &g, &b);
-         ColorRGB finalColor = Color::Mix(r, g, b);
-         textureData.pixels[i] = finalColor;
-      }
-
-      // Texture data preparation complete
-      pObject->m_diffuseTextureData = std::move(textureData);
-
-      SDL_FreeSurface(pDiffuseTextureImage);
-   }
+      std::cout << "Warning: No Material components were loaded successfully" << std::endl;
+   }   
 
    // Store in factory and return raw pointer
    // BEGIN THREAD UNSAFE

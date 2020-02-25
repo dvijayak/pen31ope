@@ -21,6 +21,7 @@ add_executable(pen31ope
     Common/Chrono.cpp
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
+    Geometry/SDLTextureLoader.cpp
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
     )

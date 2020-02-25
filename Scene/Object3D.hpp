@@ -6,16 +6,8 @@
 #include <memory>
 
 #include "Mesh.hpp"
+#include "Material.hpp"
 #include "Color.hpp"
-
-struct TextureData
-{
-   uint width, height;
-   /**
-    * Should support 24-bit color values
-    */
-   std::vector<ColorRGB> pixels;   
-};
 
 /**
  * Componentized class for representing objects that will be rendered in a 3D scene.
@@ -36,15 +28,14 @@ private:
    std::unique_ptr<Mesh> m_mesh;
 
    /**
-    * Contains raw pixels corresponding to the diffuse texture, if provided.
+    * Surface material info for advanced rendering
     */
-   TextureData m_diffuseTextureData;
+   std::unique_ptr<Material> m_material;
 
    /**
     * Must only be constructed and populated by factory
     */
    Object3D () {}
-
    friend class Object3DFactory;
 
 public:
@@ -55,13 +46,7 @@ public:
     */ 
    Mesh const* Mesh() const { return m_mesh.get(); }
 
-   TextureData const& DiffuseTexture () const { return m_diffuseTextureData; }
-
-   /**
-    * Map a normalized diffuse texture uv coordinate to the corresponding pixel color
-    */
-   ColorRGB DiffuseColorFromTexture (float const u, float const v) const;
-   inline ColorRGB DiffuseColorFromTexture (Vector2 const& uv) const { return DiffuseColorFromTexture(uv.x, uv.y); }
+   Material const* Material() const { return m_material.get(); }
 };
 
 #endif

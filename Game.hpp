@@ -61,6 +61,7 @@ private:
     // the Observer pattern in due time...
     float m_screenWidth;
     float m_screenHeight;
+    std::vector<float> m_zBuffer;
 
     Object3DFactory m_objectFactory;
     std::vector<Object3D*> m_objects;
