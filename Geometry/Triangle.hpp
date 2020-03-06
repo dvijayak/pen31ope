@@ -44,21 +44,22 @@ public:
          */     
 
         // Calculate cross product of edge vectors
-        Vector3 u = Cross(Vector3(
+        float u_x, u_y, u_z;
+        Cross(
             v1.x - v0.x,
             v2.x - v0.x,
-            v0.x - p.x
-        ), Vector3(
+            v0.x - p.x,
             v1.y - v0.y,
             v2.y - v0.y,
-            v0.y - p.y
-        ));
+            v0.y - p.y,
+            u_x, u_y, u_z // out params
+        );
 
         // Compute the coefficients of the barycentric linear combination
         return Vector3(
-            1.f - ((u.x + u.y) / u.z),
-            u.x / u.z,
-            u.y / u.z
+            1.f - ((u_x + u_y) / u_z),
+            u_x / u_z,
+            u_y / u_z
         ); // I don't really understand what's going on here, but this is courtesy of ssloy: https://github.com/ssloy/tinyrenderer/wiki/Lesson-2-Triangle-rasterization-and-back-face-culling
     }
 };

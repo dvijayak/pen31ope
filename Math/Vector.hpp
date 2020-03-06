@@ -387,6 +387,16 @@ Vector<Numeric, 3> Cross (Vector<Numeric, 3> const& v, Vector<Numeric, 3> const&
    );
 }
 
+/**
+ * Performance-optimized version that minimizes Vector object constructions
+ */
+inline void Cross (float const v_x, float const v_y, float const v_z, float const w_x, float const w_y, float const w_z, float & out_x, float & out_y, float & out_z)
+{
+   out_x = v_y * w_z - v_z * w_y;
+   out_y = v_z * w_x - v_x * w_z;
+   out_z = v_x * w_y - v_y * w_x;
+}
+
 //// I/O ////
 
 template <typename Numeric, uint N>
