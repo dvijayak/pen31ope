@@ -12,20 +12,15 @@
 
 class TriangleUtil
 {
-public: 
-    // TODO: TEMPLATIZE for incl yAxis +-direction 
-    static Box2UInt MinimumBoundingBox (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2)
+public:
+    template <typename Numeric>
+    static Box2Type<Numeric> MinimumBoundingBox (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2)
     {
-        // Assume yAxis increases downwards
-        // TODO: Can't always assume this
-
         float x_min = std::min(v0.x, std::min(v1.x, v2.x));
         float y_min = std::min(v0.y, std::min(v1.y, v2.y));
         float x_max = std::max(v0.x, std::max(v1.x, v2.x));
         float y_max = std::max(v0.y, std::max(v1.y, v2.y));
-
-        // TODO: Clean this up
-        return Box2UInt{std::array<uint, 2>{uint(x_min), uint(y_min)}, std::array<uint, 2>{uint(x_max), uint(y_max)}};
+        return Box2Type<Numeric>{Vector<Numeric, 2>(x_min, y_min), Vector<Numeric, 2>(x_max, y_max)};
     }
 
     /**
@@ -33,7 +28,6 @@ public:
      */
     // TODO: This function is a hotspot. The many Vector3 constructions isn't good.
     static Vector3 BarycentricCoordinates (Vector3 const& p, Vector3 const& v0, Vector3 const& v1, Vector3 const& v2)
-    // static Vector3 BarycentricCoordinates (Vector3 const& p, std::array<Vector3, 3> const&  vertices)
     {
         /*
          * Label as follows:

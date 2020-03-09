@@ -4,12 +4,15 @@
 
 #include <cmath>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #include "SDL.h"
 #include "SDL_image.h"
 
 #include "Color.hpp"
 #include "Chrono.hpp"
+#include "Matrix.hpp"
 
 #include "Mesh.hpp"
 #include "Triangle.hpp"
@@ -39,6 +42,8 @@ int Game::Run ()
 
     //// Create some test objects ////
 
+    m_camera = Vector3(0, 0, 3);
+
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
     // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));
 
@@ -63,7 +68,7 @@ int Game::Run ()
         elapsed = current - previous;
         lag += elapsed;
         previous = current;
-        std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
         if (ProcessEvents()) break;
@@ -139,7 +144,7 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
 {
     return Vector3(
         (v.x + 1.f) * 0.5f * m_screenWidth,
-        (v.y * -1.f + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
+        (v.y + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
         v.z
         );
 }
@@ -147,17 +152,13 @@ Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
 void Game::DrawWorld (float dt)
 {
     ColorRGB color = Color::White;
+
+    Matrix4 projectionMatrix = Matrix4::Identity();
+    projectionMatrix(3, 2) = -1/m_camera.z;
     
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
-
-        // // TODO :TEST
-        // for (int i = 0; i < 1024; i++)
-        //     for (int j = 0; j < 1024; j++)
-        //         m_pRenderer->SetPixel(i, j, obj->DiffuseColorFromTexture(
-        //             float(i)/1024, float(j)/1024
-        //             ));
 
         for (auto const& face : obj->Mesh()->GetFaces())
         {
@@ -166,19 +167,20 @@ void Game::DrawWorld (float dt)
             // Back-face culling            
             if (intensity >= 0) continue;
             
-            // Transform to screen space, maintaining z-component
-            Vector3 v0 = NDCToScreenPixels(face[0].xyz());
-            Vector3 v1 = NDCToScreenPixels(face[1].xyz());
-            Vector3 v2 = NDCToScreenPixels(face[2].xyz());
+            // Apply perspective projection, then transform to screen space, maintaining z-component
+            Vector3 v0 = NDCToScreenPixels(projectionMatrix * face[0].xyz());
+            Vector3 v1 = NDCToScreenPixels(projectionMatrix * face[1].xyz());
+            Vector3 v2 = NDCToScreenPixels(projectionMatrix * face[2].xyz());
             
             // Compute minimum rectangle that fully contains the 3 vertices in screen space
-            auto const boundingBox = TriangleUtil::MinimumBoundingBox(v0, v1, v2);
-            uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
-            uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
+            auto const boundingBox = TriangleUtil::MinimumBoundingBox<float>(v0, v1, v2)
+                                        .Clip(Box2(Vector2(0, 0), Vector2(m_screenWidth, m_screenHeight)));
+            uint x_start = boundingBox.bottomLeft.x, y_start = boundingBox.bottomLeft.y;
+            uint x_end =  boundingBox.topRight.x, y_end = boundingBox.topRight.y;
 
             // Identify the pixels within the bounds and compute their colour
             for (uint x = x_start; x <= x_end; ++x)
-            {
+            {                
                 for (uint y = y_start; y <= y_end; ++y)
                 {
                     Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), v0, v1, v2);

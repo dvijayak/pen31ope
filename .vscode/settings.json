@@ -82,7 +82,8 @@
         "queue": "cpp",
         "random": "cpp",
         "bit": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "cassert": "cpp"
     },
     "cmake.configureOnOpen": false
 }

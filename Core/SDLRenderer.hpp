@@ -34,6 +34,14 @@ public:
     void DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color) override;
 
 private:
+    /**
+     * This function can be called in order to transform an existing frame that
+     * assumes that the origin is at bottom-left corner (y-axis increases upwards)
+     * into a frame whose origin begins at the top-left corner (y-axis increases downwards).
+     * This is usually expected by all.
+     */    
+    void FlipFrameVertically();
+
     uint m_WIDTH;
     uint m_HEIGHT;
 
@@ -42,6 +50,7 @@ private:
 
     // We possess ownership of screen pixels, screen texture and screen renderer
     std::vector<ColorRGB> m_pixels;
+    std::vector<ColorRGB> m_rowBuffer; // buffer of one row's worth of pixels that can be freely used as working space
     SDL_Renderer* m_pRenderer = 0;
     SDL_Texture* m_pTexture = 0;
 

@@ -19,12 +19,17 @@
 - Gouraud shading
 - Gamma correction
 - Hidden faces removal via Z-Buffer
+- Texture mapping
 - Barycentric coordinates
    - Triangle rasterizing
    - Z-buffer
 - Templated math library for applicable elements
    - Vectors
-
+   - Matrics
+- Matrices
+   - Addition, subtraction, multiplication
+   - Determinant
+   - Identity
 
 # To Learn
 
@@ -43,12 +48,7 @@ This serves as a high-level TODO list, in no particular order.
       - Dimetric
       - Trimetric
 - Matrices
-   - Addition, subtraction, multiplication
-   - Determinant
-   - Identity
    - Inverse
-- Templated math library for applicable elements
-   - Matrices
 - Quaternions
 - Transformations
    - Translation
@@ -62,7 +62,6 @@ This serves as a high-level TODO list, in no particular order.
    - Vertex shaders
    - Fragment/Pixel shaders
 - Rays
-- Texture mapping
 - Anti-aliasing
 - Perspective correct interpolation
 - Phong shading

@@ -24,13 +24,38 @@ private:
    components_type m_components;
 
 public:
+   Vector () : Vector(0) {}
+
    /**
     * Allow implicit construction from std::array
     */
    Vector (components_type const& components) : m_components(components) {}
 
    /**
-    * Generic component read/write access; must be reimplemnted by all specializations
+    * Create a vector filled with the given value; must be reimplemented by specializations that wish to support this constructor
+    */
+   explicit Vector (Numeric const k)
+   {
+      for (uint i = 0; i < N; ++i)
+      {
+         m_components[i] = k;
+      }
+   }
+
+   /**
+    * Update all elements of this vector to be the given value; must be reimplemented by specializations that wish to support this assignment
+    */
+   Vector<Numeric, N>& operator= (Numeric const k)
+   {
+      for (uint i = 0; i < N; ++i)
+      {
+         m_components[i] = k;
+      }
+      return *this;
+   }
+
+   /**
+    * Generic component read/write access; must be reimplemented by all specializations
     */
    inline Numeric& operator[] (uint const index)
    {
@@ -68,9 +93,19 @@ public:
       : x(_x), y(_y), z(_z)
    {}
 
+   explicit Vector (Numeric const k)
+      : x(k), y(k), z(k)
+   {}
+
    // explicit Vector (Vector<Numeric, 2> const& other2D)
    //    : m_x(other2D.x, other2D.y)
    // {}
+
+   Vector<Numeric, 3>& operator= (Numeric const k)
+   {
+      x = k, y = k, z = k;
+      return *this;
+   }
 
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
@@ -93,6 +128,8 @@ public:
          default: return z;
       }
    }
+   
+   inline Vector<Numeric, 2> xy () const { return Vector<Numeric, 2>(x, y); }
 };
 
 template<typename Numeric>
@@ -127,6 +164,16 @@ public:
    explicit Vector (Numeric const _x=0, Numeric const _y=0)
       : x(_x), y(_y)
    {}
+
+   explicit Vector (Numeric const k)
+      : x(k), y(k)
+   {}
+
+   Vector<Numeric, 2>& operator= (Numeric const k)
+   {
+      x = k, y = k;
+      return *this;
+   }
 
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
@@ -173,6 +220,16 @@ public:
       : x(_x), y(_y), z(_z), w(_w)
    {}
 
+   explicit Vector (Numeric const k)
+      : x(k), y(k), z(k), w(k)
+   {}
+
+   Vector<Numeric, 4>& operator= (Numeric const k)
+   {
+      x = k, y = k, z = k, w = k;
+      return *this;
+   }
+
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
@@ -196,6 +253,9 @@ public:
          default: return w;
       }
    }
+
+   inline Vector<Numeric, 2> xyz () const { return Vector<Numeric, 3>(x, y, z); }
+   inline Vector<Numeric, 2> xy () const { return Vector<Numeric, 2>(x, y); }
 };
 
 //// Operations, as free functions ////
@@ -328,19 +388,22 @@ Vector<Numeric, N>& operator/= (Vector<Numeric, N> & v, float const scalar)
 /**
  * Tip: Dot product of unit vectors will range between -1 and 1, inclusive
  */
-template <typename Numeric, uint N>
-float Dot (Vector<Numeric, N> const& v, Vector<Numeric, N> const& w)
+template <typename Numeric, uint N, typename ResultNumeric=Numeric>
+Numeric Dot (Vector<Numeric, N> const& v, Vector<Numeric, N> const& w)
 {
-   float dot = 0;
+   ResultNumeric dot = 0;
    for (uint i = 0; i < N; ++i)
-      dot += static_cast<float>(v[i]) * w[i];
+      dot += (v[i]) * w[i];
    return dot;
 }
 
-template <typename Numeric, uint N>
-float Magnitude (Vector<Numeric, N> const& v)
+/**
+ * Note: due to forced use of single-precision floating-point sqrt function, the result is bound to have precision errors even if the vector numeric type is of higher precision
+ */
+template <typename Numeric, uint N, typename ResultNumeric=Numeric>
+Numeric Magnitude (Vector<Numeric, N> const& v)
 {
-   return sqrtf(Dot<Numeric, N>(v, v));
+   return static_cast<ResultNumeric>(sqrtf(Dot<Numeric, N>(v, v)));
 }
 
 template <typename Numeric, uint N>
@@ -409,7 +472,7 @@ std::ostream& operator<< (std::ostream& os, Vector<Numeric, N> const& v)
    return os;
 }
 
-//// Typedefs
+//// Typedefs ////
 
 typedef Vector<float, 3> Vector3; // by far the most popular
 typedef Vector<float, 2> Vector2;

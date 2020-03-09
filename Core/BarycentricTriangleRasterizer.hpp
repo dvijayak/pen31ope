@@ -41,17 +41,15 @@ void BarycentricTriangleRasterizer::UpdateScreenResolution (uint const width, ui
 
 void BarycentricTriangleRasterizer::DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color)
 {
-   std::array<Vector3, 3> vertices = {v0, v1, v2};
-
-   auto const boundingBox = TriangleUtil::MinimumBoundingBox(vertices);
+   auto const boundingBox = TriangleUtil::MinimumBoundingBox(v0, v1, v2);
    
-   uint x_start = boundingBox.topLeft[0], y_start = boundingBox.topLeft[1];
-   uint x_end = boundingBox.bottomRight[0], y_end = boundingBox.bottomRight[1];
+   uint x_start = boundingBox.bottomLeft.x, y_start = boundingBox.bottomLeft.y;
+   uint x_end = boundingBox.topRight.x, y_end = boundingBox.topRight.y;
    for (uint x = x_start; x <= x_end; ++x)
    {
       for (uint y = y_start; y <= y_end; ++y)
       {
-         Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), vertices);
+         Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), v0, v1, v2);
 
          float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z;
          if (u >= 0 && v >= 0 && w >= 0)

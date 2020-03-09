@@ -63,6 +63,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
 
     // Raw buffer
     m_pixels = std::vector<ColorRGB>(m_WIDTH * m_HEIGHT);
+    m_rowBuffer = std::vector<ColorRGB>(m_WIDTH);
 
     // Initialize rasterizers
     // m_pLineRasterizer = std::make_unique<LerpLineRasterizer>(this);
@@ -109,6 +110,8 @@ SDLRenderer::~SDLRenderer ()
 
 void SDLRenderer::RenderFrame ()
 {
+    FlipFrameVertically();
+
     SDL_UpdateTexture(m_pTexture, 0, m_pixels.data(), m_WIDTH * sizeof(ColorRGB));
 
     SDL_RenderClear(m_pRenderer);
@@ -128,4 +131,29 @@ void SDLRenderer::FillScreenBackground (ColorRGB color)
             SetPixel(w, h, color);
         }
     }
+}
+
+void SDLRenderer::FlipFrameVertically ()
+{
+    ColorRGB * pixels = m_pixels.data();
+    
+    // Algorithm: Just like reversing a string, except each character is actually a row of pixels
+
+    // Start with two pointers, one to the first row, the other to the last row
+    uint row1 = 0, row2 = m_HEIGHT-1;
+    
+    // Temp buffer used for swapping
+    ColorRGB * tmp = m_rowBuffer.data();
+
+    // Until the two pointers are pointing to the same row or have passed each other, swap the two rows being pointed to
+    for (; row1 < row2; ++row1, --row2)
+    {
+        ColorRGB * a = pixels + row1*m_WIDTH;
+        ColorRGB * b = pixels + row2*m_WIDTH;
+
+        // Swap rows
+        memcpy(tmp, a, m_WIDTH * sizeof(ColorRGB));
+        memcpy(a,   b, m_WIDTH * sizeof(ColorRGB));
+        memcpy(b, tmp, m_WIDTH * sizeof(ColorRGB));
+    }    
 }

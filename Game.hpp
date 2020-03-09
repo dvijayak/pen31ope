@@ -66,6 +66,8 @@ private:
     Object3DFactory m_objectFactory;
     std::vector<Object3D*> m_objects;
     std::vector<Vector3> m_lights;
+
+    Vector3 m_camera;
 };
 
 #endif
