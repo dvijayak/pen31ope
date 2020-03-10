@@ -34,6 +34,17 @@ Game::~Game ()
     // Destroy relevant singletons/managers
 }
 
+void Game::SetScreenWidth (float const width)
+{
+    m_screenWidth = width;
+    UpdateViewportMatrix();
+}
+
+void Game::SetScreenHeight (float const height)
+{
+    m_screenHeight = height;
+    UpdateViewportMatrix();
+}
 
 int Game::Run ()
 {
@@ -42,7 +53,7 @@ int Game::Run ()
 
     //// Create some test objects ////
 
-    m_camera = Vector3(0, 0, 3);
+    m_camera.LookAt(Vector3(1, 1, 3));
 
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
     // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));
@@ -126,6 +137,7 @@ bool Game::ProcessEvents ()
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
                     m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
+                    // m_camera.Move(Vector3::Left * movement);
                 }
                 break;
             case SDL_MOUSEMOTION:
@@ -140,21 +152,23 @@ bool Game::ProcessEvents ()
     return false; // in the normal case, we are NOT exiting the game loop
 }
 
-Vector3 Game::NDCToScreenPixels (Vector3 const& v) const
+void Game::UpdateViewportMatrix ()
 {
-    return Vector3(
-        (v.x + 1.f) * 0.5f * m_screenWidth,
-        (v.y + 1.f) * 0.5f * m_screenHeight, // y-coordinates are flipped in screen space
-        v.z
-        );
+    // Convert from [-1, 1] to [0, 1], then scale by screen dimensions    
+    float v_x = 0.5f * m_screenWidth, v_y = 0.5f * m_screenHeight;
+    m_viewportMatrix = Matrix4(Matrix4::elements_array_type{
+       v_x,   0, 0, v_x, 
+         0, v_y, 0, v_y, 
+         0,   0, 1,   0,  // TODO: This is incomplete....need to transform to NDC CUBE, NOT rectangle...see https://github.com/ssloy/tinyrenderer/wiki/Lesson-5-Moving-the-camera#viewport
+         0,   0, 0,   1, 
+    });
 }
 
 void Game::DrawWorld (float dt)
 {
     ColorRGB color = Color::White;
-
-    Matrix4 projectionMatrix = Matrix4::Identity();
-    projectionMatrix(3, 2) = -1/m_camera.z;
+ 
+    Matrix4 const& screenProjectionViewModelMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
     
     for (auto&& obj : m_objects)
     {
@@ -168,9 +182,9 @@ void Game::DrawWorld (float dt)
             if (intensity >= 0) continue;
             
             // Apply perspective projection, then transform to screen space, maintaining z-component
-            Vector3 v0 = NDCToScreenPixels(projectionMatrix * face[0].xyz());
-            Vector3 v1 = NDCToScreenPixels(projectionMatrix * face[1].xyz());
-            Vector3 v2 = NDCToScreenPixels(projectionMatrix * face[2].xyz());
+            Vector3 v0 = screenProjectionViewModelMatrix * face[0].xyz();
+            Vector3 v1 = screenProjectionViewModelMatrix * face[1].xyz();
+            Vector3 v2 = screenProjectionViewModelMatrix * face[2].xyz();
             
             // Compute minimum rectangle that fully contains the 3 vertices in screen space
             auto const boundingBox = TriangleUtil::MinimumBoundingBox<float>(v0, v1, v2)

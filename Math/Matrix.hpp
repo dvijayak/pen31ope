@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <type_traits>
+#include <array>
 
 #include "Vector.hpp"
 
@@ -22,6 +23,7 @@ public:
 	typedef Vector<Numeric, C> row_type;
 	typedef Vector<Numeric, R> column_type;
    typedef std::array<row_type, R> elements_type;
+	typedef std::array<Numeric, R*C> elements_array_type;
 
 private:
    elements_type m_elements;
@@ -34,7 +36,7 @@ public:
 	 * 
 	 * @param {bool} rowMajor determines how to interpret the order of the elements; if `true`, then the elements are populated row-first, otherwise they are populated column-first; default is row-first 
 	 */
-   explicit Matrix (std::array<Numeric, R*C> const& elements, bool rowMajor=true)
+   explicit Matrix (elements_array_type const& elements, bool rowMajor=true)
    {
 		if (rowMajor)
 		{

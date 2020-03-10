@@ -7,7 +7,9 @@
 
 #include "IRenderer.hpp"
 #include "Vector.hpp"
+#include "Matrix.hpp"
 #include "Object3DFactory.hpp"
+#include "Camera.hpp"
 
 class Game
 {
@@ -33,8 +35,8 @@ public:
 
     void SetRenderer (IRenderer* pRM) { m_pRenderer = pRM; }
 
-    void SetScreenWidth (float width) { m_screenWidth = width; }
-    void SetScreenHeight (float height) { m_screenHeight = height; }
+    void SetScreenWidth (float width);
+    void SetScreenHeight (float height);
 
     /**
      * Performed once normally at the beginning of each frame
@@ -47,10 +49,7 @@ public:
     void DrawWorld (float dt); // dt => normalized lag, i.e. how far into the next frame update cycle the game loop is currently in
 
 private:
-    /**
-     * Convert from [-1, 1] to [0, 1], then scale by screen dimensions
-     */
-    Vector3 NDCToScreenPixels (Vector3 const& v) const;
+    void UpdateViewportMatrix ();    
 
     size_t m_targetFrameRate; // FPS
     size_t m_fixedUpdateTimeStep; // milliseconds, normally synced to target frame rate
@@ -67,7 +66,9 @@ private:
     std::vector<Object3D*> m_objects;
     std::vector<Vector3> m_lights;
 
-    Vector3 m_camera;
+    Camera m_camera;
+
+    Matrix4 m_viewportMatrix;
 };
 
 #endif

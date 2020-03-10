@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "Matrix.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
 #include "Color.hpp"
@@ -31,6 +32,11 @@ private:
     * Surface material info for advanced rendering
     */
    std::unique_ptr<Material> m_material;
+
+   /**
+    * Transforms from model to world space
+    */
+   Matrix4 m_modelMatrix;
 
    /**
     * Must only be constructed and populated by factory

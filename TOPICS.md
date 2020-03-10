@@ -30,6 +30,8 @@
    - Addition, subtraction, multiplication
    - Determinant
    - Identity
+- Projections
+   - Perspective
 
 # To Learn
 
@@ -39,7 +41,9 @@ This serves as a high-level TODO list, in no particular order.
    - Cube
    - Sphere
    - Plane
+- Axis-aligned bounding box (AABB)
 - Camera
+   - View frustum culling
 - Projections
    - Perspective
    - Orthographic
