@@ -178,8 +178,8 @@ void Game::DrawWorld (float dt)
         {
             float intensity = Dot(m_lights[0], face.Normal());
 
-            // Back-face culling            
-            if (intensity >= 0) continue;
+            // Back-face culling                        
+            if (Dot(m_camera.LookAtDirection(), face.Normal()) >= 0) continue;
             
             // Apply perspective projection, then transform to screen space, maintaining z-component
             Vector3 v0 = screenProjectionViewModelMatrix * face[0].xyz();

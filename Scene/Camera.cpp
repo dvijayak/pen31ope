@@ -37,6 +37,6 @@ void Camera::LookAt (Vector3 const& position, Vector3 const& center, Vector3 con
 
    // Update other members
    m_position = position;
-   m_lookAtDirection = direction;
+   m_lookAtDirection = Normalized(-direction);
    m_projection = projection;
 }
