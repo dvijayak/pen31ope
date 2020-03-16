@@ -7,6 +7,12 @@
 #include <cstdlib>
 #include <ctime>
 
+#ifdef WIN32
+#define NOMINMAX
+#include "Windows.h"
+#include <sstream>
+#endif
+
 #include "SDL.h"
 #include "SDL_image.h"
 
@@ -79,7 +85,13 @@ int Game::Run ()
         elapsed = current - previous;
         lag += elapsed;
         previous = current;
+        #if defined(WIN32)
+        std::stringstream ss;
+        ss << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        OutputDebugStringA(ss.str().c_str());
+        #else
         // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        #endif
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
         if (ProcessEvents()) break;
