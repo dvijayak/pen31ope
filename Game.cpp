@@ -230,8 +230,8 @@ void Game::DrawWorld (float dt)
                         float pixelIntensity = u * intensity0 + v * intensity1 + w * intensity2;
 
                         // Apply lighting intensity modifier
-                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
-                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, -pixelIntensity); // gouraud shading, one color
+                        // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
+                        ColorRGB intensifiedColor = Color::Intensify(Color::White, -pixelIntensity); // gouraud shading, one color
                         // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity); // flat shading
                         // ColorRGB intensifiedColor = Color::Intensify(Color::White, -intensity); // flat shading, one color
                         // ColorRGB intensifiedColor = diffuseColor; // no shading
