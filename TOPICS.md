@@ -30,8 +30,15 @@
    - Addition, subtraction, multiplication
    - Determinant
    - Identity
+   - Inverse
+      - Orthogonal matrix inverse
 - Projections
    - Perspective
+- Camera
+   - Perspective projection
+- Transformations
+   - Translation
+   - Rotation
 
 # To Learn
 

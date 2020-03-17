@@ -16,6 +16,8 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
+#include "Constants.hpp"
+
 #include "Color.hpp"
 #include "Chrono.hpp"
 #include "Matrix.hpp"
@@ -25,8 +27,6 @@
 
 constexpr uint MAX_FPS = 240;
 constexpr uint MIN_FPS = 15;
-
-static int TEST = 0;
 
 Game::Game ()
     : m_targetFrameRate(60)
@@ -43,31 +43,58 @@ Game::~Game ()
 void Game::SetScreenWidth (float const width)
 {
     m_screenWidth = width;
+
+    m_camera.Aspect(m_screenWidth/m_screenHeight);
     UpdateViewportMatrix();
+    RecreateZBuffer();
 }
 
 void Game::SetScreenHeight (float const height)
 {
     m_screenHeight = height;
+
+    m_camera.Aspect(m_screenWidth/m_screenHeight);
     UpdateViewportMatrix();
+    RecreateZBuffer();
+}
+
+void Game::RecreateZBuffer()
+{
+    // TODO: I don't like the Z-Buffer data structure being defined in this class...
+    m_zBuffer = std::vector<float>(m_screenWidth * m_screenHeight); 
+    ResetZBuffer();
+}
+
+void Game::ResetZBuffer ()
+{
+    std::fill(m_zBuffer.begin(), m_zBuffer.end(), std::numeric_limits<float>::lowest()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
 }
 
 int Game::Run ()
-{
-    // TODO: I don't like the Z-Buffer data structure being defined in this class...
-    m_zBuffer = std::vector<float>(m_screenWidth * m_screenHeight, std::numeric_limits<float>::lowest()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
-
+{    
     //// Create some test objects ////
 
-    m_camera.LookAt(Vector3(1, 1, 3));
+    // Setup camera
+    m_camera.Fov(Constants::Deg2Rad(45));
+    m_camera.Aspect(m_screenWidth/m_screenHeight);
+    m_camera.Near(0.1f);
+    m_camera.Far(100.f);    
+    m_camera.LookAt(Vector3(0, 0, 3));
 
+    // Add objects to scene
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
     // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));
+    // m_objects[0]->Translate(Vector3(-0.5f, 0, 0));
+    m_objects[0]->Rotate(0, Constants::Deg2Rad(0), 0);
+    // m_objects[1]->Translate(Vector3(0.5f, 0, 0));
 
+    // Setup lights
     m_lights.push_back(Normalized(Vector3::Backward));
+    // m_lights.push_back(Normalized(Vector3(20, 0, -3)));
+    // m_lights.push_back(Normalized(Vector3::Forward));
 
     //// Game loop ////
-    
+
     int rc = GameErrorCode::OK;
 
     // Used in computing time-step
@@ -148,8 +175,15 @@ bool Game::ProcessEvents ()
                 {
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
-                    m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
+                    // m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
                     // m_camera.Move(Vector3::Left * movement);
+                    m_objects[0]->Rotate(0, -movement, 0); // TODO: Why does rotating the OBJECT cause the shading from the light source to adjust as if the CAMERA or the LIGHT were being rotated??? I suspect this has to do with incorrect surface normal transformation...
+
+                    {
+                        float movement = 0.1f;
+                        movement *= event.key.keysym.sym == SDLK_UP ? 1 : (event.key.keysym.sym == SDLK_DOWN ? -1 : 0);                    
+                        m_objects[0]->Translate(Vector3::Up * movement);
+                    }
                 }
                 break;
             case SDL_MOUSEMOTION:
@@ -178,9 +212,11 @@ void Game::UpdateViewportMatrix ()
 
 void Game::DrawWorld (float dt)
 {
-    ColorRGB color = Color::White;
+    ResetZBuffer();
  
-    Matrix4 const& screenProjectionViewModelMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
+    Matrix4 const& screenProjectionViewMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
+
+    float minZ = 200.f;
     
     for (auto&& obj : m_objects)
     {
@@ -188,12 +224,20 @@ void Game::DrawWorld (float dt)
 
         for (auto const& face : obj->Mesh()->GetFaces())
         {
+            Matrix4 screenProjectionViewModelMatrix = screenProjectionViewMatrix * obj->ModelMatrix();
+
+            // TODO: Implement correct transformation of surface normals
+            // ColMatrix4 transformedNormalMatrix = screenProjectionViewMatrix * ColMatrix4(ColMatrix4::elements_array_type{face.Normal().x, face.Normal().y, face.Normal().z, 0}, false);
+            // Vector3 transformedNormal = transformedNormalMatrix.Col(0).xyz();
+            // float intensity = Dot(m_lights[0], transformedNormal);
             float intensity = Dot(m_lights[0], face.Normal());
 
+            // TODO: Disabled until surface normals are correctly transformed
             // Back-face culling                        
-            if (Dot(m_camera.LookAtDirection(), face.Normal()) >= 0) continue;
+            // if (Dot(m_camera.LookAtDirection(), face.Normal()) >= 0) continue;
             
-            // Apply perspective projection, then transform to screen space, maintaining z-component
+            // Apply perspective projection, transform to screen space while maintaining z-coordinate and also taking care of the perspective divide
+            // TODO: I don't think this is working correctly....Z values after perspective projection are always greater than 1, instead of being between -1 and 1...the z-buffer technically works so the transformation is doing _something_ right but this isn't good enough because I need the range to be -1 to 1 in order to do clipping later on
             Vector3 v0 = screenProjectionViewModelMatrix * face[0].xyz();
             Vector3 v1 = screenProjectionViewModelMatrix * face[1].xyz();
             Vector3 v2 = screenProjectionViewModelMatrix * face[2].xyz();
@@ -218,20 +262,21 @@ void Game::DrawWorld (float dt)
                         auto const& uv1 = face[1].uv();
                         auto const& uv2 = face[2].uv();
                         float u_interpolated = u * uv0.x + v * uv1.x + w * uv2.x;
-                        float v_interpolated = u * (1.f - uv0.y) + v * (1.f - uv1.y) + w * (1.f - uv2.y); // subtract y from 1 since y-axis is flipped in screen space
+                        float v_interpolated = u * (1.f - uv0.y) + v * (1.f - uv1.y) + w * (1.f - uv2.y); // subtract y from 1 since y-axis is flipped in screen space // TODO: Why is this flipping still needed, when we no longer need to flip y-axis in screen space?
 
                         // Get color from diffuse map
                         ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : Color::White;
 
                         // Gouraud shading: interpolate normal and compute lighting intensity
+                        // TODO: Transform surface normal correctly!
                         float intensity0 = Dot(m_lights[0], face[0].normal());
                         float intensity1 = Dot(m_lights[0], face[1].normal());
                         float intensity2 = Dot(m_lights[0], face[2].normal());
                         float pixelIntensity = u * intensity0 + v * intensity1 + w * intensity2;
 
                         // Apply lighting intensity modifier
-                        // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
-                        ColorRGB intensifiedColor = Color::Intensify(Color::White, -pixelIntensity); // gouraud shading, one color
+                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
+                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, -pixelIntensity); // gouraud shading, one color
                         // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity); // flat shading
                         // ColorRGB intensifiedColor = Color::Intensify(Color::White, -intensity); // flat shading, one color
                         // ColorRGB intensifiedColor = diffuseColor; // no shading
@@ -251,6 +296,7 @@ void Game::DrawWorld (float dt)
                                 m_zBuffer[index] = z;
                                 m_pRenderer->SetPixel(x, y, intensifiedColor);
                             }
+                            if (z < minZ) minZ = z;
                         }   
                     }
                 }
@@ -259,4 +305,7 @@ void Game::DrawWorld (float dt)
     }
 
     m_pRenderer->RenderFrame();
+
+    std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
+    std::cout << "smallest z buffer value is " << minZ << std::endl;
 }

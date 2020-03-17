@@ -1,5 +1,74 @@
 #include "Camera.hpp"
 
+#include <cmath>
+#include <iostream>
+
+void Camera::UpdatePerspectiveProjectionMatrix ()
+{
+   /*
+      The math here is derived from sections 5.3-5.5 of Lengyel's 3D Math for Game Programming 
+      and CG, third edition.
+      
+      Let Horizontal field of view = theta
+      Then, Focal Length, e = 1/tan(theta/2)
+
+      aspect ratio, a = height/width
+      This means that for every 1 width, you have a height
+      So, bottom plane, b = -a, top plane, t = a
+      Thus, left plane, l = -1, right plane, r = 1
+
+      So given aspect ratio, focal length, near plane distance and far plane distance, we can properly compute l, r, b, t:
+         Scale rectangle by n/e. Why? Because we want the distance to the near plane to be n, and we know that focal length is e. So n = n/e * e.
+         
+         Therefore,
+         b = -an/e, t = an/e
+         l = -n/e, r = n/e
+
+      According to book,
+
+      2n/(r-l)    0        (r+l)/(r-l)    0
+      0         2n/(t-b)   (t+b)/(t-b)    0
+      0           0       -(f+n)/(f-n)    2nf/(f-n)
+      0           0       -1              0
+
+      Given what we have here,
+
+      r-l = n/e - -n/e = 2n/e
+      Then 2n/(r-l) = 2n/2n/e = e
+      If r + (-l) = 2n/e, -l = 2n/e - r. Then r+l = r - (-l) = r - (2n/e - r) = 2r - 2n/e
+      Then (r+l)/(r-l) = (2r - 2n/e)/2n/e =  ((2re-2n)/e) * e/2n = (2re - 2n)/2n = re/n - 1 = (n/e)*(e/n) - 1 = 0
+
+      t-b = an/e - (-an/e) = 2an/e
+      Then 2n/(t-b) = 2n/2an/e = 2n * e/2an = e/a
+      If t + (-b) = 2an/e, -b = 2an/e - t. Then t+b = t - (-b) = t - (2an/e - t) = 2t - 2an/e = 2(t - an/e)
+      Then (t+b)/(t-b) = 2(t - an/e) / 2an/e = 2(t - an/e) * e/2an = e(t - an/e)/an = (te - an)/an = te/an - 1 = (an/e)*(e/an) - 1 = 0
+
+      Substituting, we have our final perspective projection matrix:
+
+      e     0      0          0
+      0    e/a     0          0
+      0     0  -(f+n)/(f-n)   2nf/(f-n)
+      0     0     -1          0
+   */
+
+   float const focalLength = 1/tanf(m_fov/2);
+
+   float const aspectRatioInverse = 1/m_aspectRatio; // we prefer the aspect ratio expressed as height/width, even though it is provided as width/height
+
+   // Abbreviations
+   float const e = focalLength;
+   float const a = aspectRatioInverse;
+   float const n = m_zNearPlaneDistance;
+   float const f = m_zFarPlaneDistance;
+
+   m_perspectiveProjectionMatrix = Matrix4(Matrix4::elements_array_type{
+      e, 0, 0, 0,
+      0, e/a, 0, 0,
+      0, 0, -(f+n)/(f-n), (2*n*f)/(f-n),
+      0, 0, -1, 0   
+   });
+}
+
 void Camera::LookAt (Vector3 const& position, Vector3 const& center, Vector3 const& up)
 {
    Vector3 direction = position - center;
@@ -49,13 +118,9 @@ void Camera::LookAt (Vector3 const& position, Vector3 const& center, Vector3 con
    m_viewMatrix = inverseOfBasisVectors * inverseOfTranslationFromWorldOrigin;   
 
    // Calculate projection matrix
-   float projection = -1.f/Magnitude(direction);
-   Matrix4 projectionMatrix = Matrix4::Identity();
-   projectionMatrix(3, 2) = projection;
-   m_projectionViewMatrix = projectionMatrix * m_viewMatrix;
+   m_projectionViewMatrix = m_perspectiveProjectionMatrix * m_viewMatrix;
 
    // Update other members
    m_position = position;
    m_lookAtDirection = Normalized(-direction);
-   m_projection = projection;
 }

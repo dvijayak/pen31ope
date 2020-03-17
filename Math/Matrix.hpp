@@ -96,6 +96,8 @@ public:
 	inline uint M () const { return R; } // alias
 	inline uint N () const { return C; } // alias
 	
+	// TODO: Might be better to change operator[] to return a Vector type, so that we can support double indexing [][] as opposed to overloading operator() for this
+
 	/**
 	 * Element access; can be used to modify matrix in-place
 	 */
@@ -316,7 +318,6 @@ float Determinant (Matrix<Numeric, 2, 2> const& A)
 	return A(0,0) * A(1,1) - A(1,0) * A(0,1);
 }
 
-
 template <typename Numeric>
 float Determinant (Matrix<Numeric, 3, 3> const& A)
 {
@@ -328,6 +329,32 @@ float Determinant (Matrix<Numeric, 3, 3> const& A)
 		  - A(0,1) * ( A(1,0) * A(2,2) - A(2,0) * A(1,2) )
 		  + A(0,2) * ( A(1,0) * A(2,1) - A(2,0) * A(1,1) )
 		  ;
+}
+
+template <typename Numeric>
+float Determinant (Matrix<Numeric, 4, 4> const& A)
+{
+	// Indices:
+	// 0,0 0,1 0,2 0,3
+	// 1,0 1,1 1,2 1,3
+	// 2,0 2,1 2,2 2,3
+	// 3,0 3,1 3,2 3,3
+	
+	// I already know how to compute the determinant using cofactor expansion,
+	// so I chose expediency by copying this hardcoded solution from https://stackoverflow.com/a/2937973/3477043
+	return
+         A(0,3) * A(1,2) * A(2,1) * A(3,0) - A(0,2) * A(1,3) * A(2,1) * A(3,0) -
+         A(0,3) * A(1,1) * A(2,2) * A(3,0) + A(0,1) * A(1,3) * A(2,2) * A(3,0) +
+         A(0,2) * A(1,1) * A(2,3) * A(3,0) - A(0,1) * A(1,2) * A(2,3) * A(3,0) -
+         A(0,3) * A(1,2) * A(2,0) * A(3,1) + A(0,2) * A(1,3) * A(2,0) * A(3,1) +
+         A(0,3) * A(1,0) * A(2,2) * A(3,1) - A(0,0) * A(1,3) * A(2,2) * A(3,1) -
+         A(0,2) * A(1,0) * A(2,3) * A(3,1) + A(0,0) * A(1,2) * A(2,3) * A(3,1) +
+         A(0,3) * A(1,1) * A(2,0) * A(3,2) - A(0,1) * A(1,3) * A(2,0) * A(3,2) -
+         A(0,3) * A(1,0) * A(2,1) * A(3,2) + A(0,0) * A(1,3) * A(2,1) * A(3,2) +
+         A(0,1) * A(1,0) * A(2,3) * A(3,2) - A(0,0) * A(1,1) * A(2,3) * A(3,2) -
+         A(0,2) * A(1,1) * A(2,0) * A(3,3) + A(0,1) * A(1,2) * A(2,0) * A(3,3) +
+         A(0,2) * A(1,0) * A(2,1) * A(3,3) - A(0,0) * A(1,2) * A(2,1) * A(3,3) -
+         A(0,1) * A(1,0) * A(2,2) * A(3,3) + A(0,0) * A(1,1) * A(2,2) * A(3,3);
 }
 
 template <typename Numeric, uint R, uint C>
@@ -358,6 +385,8 @@ typedef Matrix<float, 3, 1> ColMatrix3;
 typedef Matrix<float, 1, 3> RowMatrix3;
 typedef Matrix<float, 2, 1> ColMatrix2;
 typedef Matrix<float, 1, 2> RowMatrix2;
+typedef Matrix<float, 4, 1> ColMatrix4;
+typedef Matrix<float, 1, 4> RowMatrix4;
 typedef Matrix<float, 2, 2> Matrix2;
 typedef Matrix<float, 3, 3> Matrix3;
 typedef Matrix<float, 4, 4> Matrix4;

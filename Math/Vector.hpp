@@ -254,7 +254,7 @@ public:
       }
    }
 
-   inline Vector<Numeric, 2> xyz () const { return Vector<Numeric, 3>(x, y, z); }
+   inline Vector<Numeric, 3> xyz () const { return Vector<Numeric, 3>(x, y, z); }
    inline Vector<Numeric, 2> xy () const { return Vector<Numeric, 2>(x, y); }
 };
 

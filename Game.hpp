@@ -49,7 +49,9 @@ public:
     void DrawWorld (float dt); // dt => normalized lag, i.e. how far into the next frame update cycle the game loop is currently in
 
 private:
-    void UpdateViewportMatrix ();    
+    void UpdateViewportMatrix (); 
+    void RecreateZBuffer ();
+    void ResetZBuffer ();
 
     size_t m_targetFrameRate; // FPS
     size_t m_fixedUpdateTimeStep; // milliseconds, normally synced to target frame rate

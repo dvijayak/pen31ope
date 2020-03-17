@@ -53,6 +53,15 @@ public:
    Mesh const* Mesh() const { return m_mesh.get(); }
 
    Material const* Material() const { return m_material.get(); }
+
+   Matrix4 const& ModelMatrix () const { return m_modelMatrix; }
+
+   void Translate (Vector3 const& translation);
+
+   /**
+    * Specify euler angles, in radians
+    */
+   void Rotate (float const x, float const y, float const z);
 };
 
 #endif
