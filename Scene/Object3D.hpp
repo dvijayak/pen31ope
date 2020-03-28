@@ -39,6 +39,11 @@ private:
    Matrix4 m_modelMatrix;
 
    /**
+    * Transforms from world to model space. The transpose of this matrix can also be used to transform normals
+    */
+   Matrix4 m_modelMatrixInverse;
+
+   /**
     * Must only be constructed and populated by factory
     */
    Object3D () {}
@@ -54,7 +59,13 @@ public:
 
    Material const* Material() const { return m_material.get(); }
 
+   /**
+    * Update the model matrix and all dependents
+    */
+   void ModelMatrix (Matrix4 const&);
+
    Matrix4 const& ModelMatrix () const { return m_modelMatrix; }
+   Matrix4 const& ModelMatrixInverse () const { return m_modelMatrixInverse; }
 
    void Translate (Vector3 const& translation);
 

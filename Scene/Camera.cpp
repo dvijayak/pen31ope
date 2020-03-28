@@ -3,6 +3,11 @@
 #include <cmath>
 #include <iostream>
 
+void Camera::UpdateProjectionViewMatrix ()
+{
+   m_projectionViewMatrix = m_perspectiveProjectionMatrix * m_viewMatrix;
+}
+
 void Camera::UpdatePerspectiveProjectionMatrix ()
 {
    /*
@@ -18,9 +23,8 @@ void Camera::UpdatePerspectiveProjectionMatrix ()
       Thus, left plane, l = -1, right plane, r = 1
 
       So given aspect ratio, focal length, near plane distance and far plane distance, we can properly compute l, r, b, t:
-         Scale rectangle by n/e. Why? Because we want the distance to the near plane to be n, and we know that focal length is e. So n = n/e * e.
-         
-         Therefore,
+      Scale rectangle by n/e. Why? Because we want the distance to the near plane to be n, and we know that focal length is e. That is, n = n/e * e.
+      Therefore,
          b = -an/e, t = an/e
          l = -n/e, r = n/e
 
@@ -28,7 +32,7 @@ void Camera::UpdatePerspectiveProjectionMatrix ()
 
       2n/(r-l)    0        (r+l)/(r-l)    0
       0         2n/(t-b)   (t+b)/(t-b)    0
-      0           0       -(f+n)/(f-n)    2nf/(f-n)
+      0           0       -(f+n)/(f-n)   -2nf/(f-n)
       0           0       -1              0
 
       Given what we have here,
@@ -47,7 +51,7 @@ void Camera::UpdatePerspectiveProjectionMatrix ()
 
       e     0      0          0
       0    e/a     0          0
-      0     0  -(f+n)/(f-n)   2nf/(f-n)
+      0     0  -(f+n)/(f-n)  -2nf/(f-n)
       0     0     -1          0
    */
 
@@ -64,9 +68,11 @@ void Camera::UpdatePerspectiveProjectionMatrix ()
    m_perspectiveProjectionMatrix = Matrix4(Matrix4::elements_array_type{
       e, 0, 0, 0,
       0, e/a, 0, 0,
-      0, 0, -(f+n)/(f-n), (2*n*f)/(f-n),
+      0, 0, -(f+n)/(f-n), (2*n*f)/(f-n), // TODO: The book says that the 2nf/f-n expression should be -(2nf)/f-n, but the `-` doesn't work properly...it works properly if I remove it though....but then my projected z coords are NOT in NDC...I'm confused 
       0, 0, -1, 0   
    });
+
+   UpdateProjectionViewMatrix();
 }
 
 void Camera::LookAt (Vector3 const& position, Vector3 const& center, Vector3 const& up)
@@ -116,11 +122,25 @@ void Camera::LookAt (Vector3 const& position, Vector3 const& center, Vector3 con
       0, 0, 0,      1
    });
    m_viewMatrix = inverseOfBasisVectors * inverseOfTranslationFromWorldOrigin;   
-
-   // Calculate projection matrix
-   m_projectionViewMatrix = m_perspectiveProjectionMatrix * m_viewMatrix;
+   
+   UpdateProjectionViewMatrix();
 
    // Update other members
    m_position = position;
    m_lookAtDirection = Normalized(-direction);
+}
+
+void Camera::Translate (Vector3 const& translation)
+{
+   m_viewMatrix *= Matrix4(Matrix4::elements_array_type{
+      1, 0, 0, -translation.x,
+      0, 1, 0, -translation.y,
+      0, 0, 1, -translation.z,
+      0, 0, 0,       1
+   });
+
+   UpdateProjectionViewMatrix();
+
+   m_position += translation;
+   // Direction doesn't change with a translation
 }

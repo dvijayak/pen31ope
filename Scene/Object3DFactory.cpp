@@ -49,7 +49,7 @@ Object3D* Object3DFactory::MakeTexturedObject (std::string const& objFileName, s
    }   
 
    // Initialize model matrix
-   pObject->m_modelMatrix = Matrix4::Identity();
+   pObject->ModelMatrix(Matrix4::Identity());
 
    // Store in factory and return raw pointer
    // BEGIN THREAD UNSAFE

@@ -21,6 +21,7 @@ class Camera
    float m_zNearPlaneDistance = 0.1f;
    float m_zFarPlaneDistance = 1000.f;
 
+   void UpdateProjectionViewMatrix ();
    void UpdatePerspectiveProjectionMatrix ();
 
 public:
@@ -32,6 +33,7 @@ public:
       m_fov = angle;
       UpdatePerspectiveProjectionMatrix();
    }
+   float Fov () const { return m_fov; }
 
    /**
     * Aspect ratio of the target screen, computed as width/height
@@ -75,6 +77,8 @@ public:
    {
       LookAt(m_position + translation);
    }
+
+   void Translate (Vector3 const& translation);
 };
 
 #endif

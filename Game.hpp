@@ -53,6 +53,8 @@ private:
     void RecreateZBuffer ();
     void ResetZBuffer ();
 
+    void DrawReferenceCube (Vector3 const& position=Vector3(), float const s=0.25f);
+
     size_t m_targetFrameRate; // FPS
     size_t m_fixedUpdateTimeStep; // milliseconds, normally synced to target frame rate
 

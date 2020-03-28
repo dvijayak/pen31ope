@@ -67,7 +67,46 @@ void Game::RecreateZBuffer()
 
 void Game::ResetZBuffer ()
 {
+    // TODO: Investigate whether memset actually is more efficient than std::fill or not
+    // memset(m_zBuffer.data(), 0, sizeof(float) * m_zBuffer.size());
     std::fill(m_zBuffer.begin(), m_zBuffer.end(), std::numeric_limits<float>::lowest()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
+}
+
+void Game::DrawReferenceCube (Vector3 const& position, float const s)
+{
+    Matrix4 const& screenProjectionViewMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
+
+    // Draw world origin + reference cube
+    Vector3 center = screenProjectionViewMatrix * position;
+    std::array<Vector3, 8> points{
+        Vector3(s, s, s),
+        Vector3(s, s, -s),
+        Vector3(-s, s, -s),
+        Vector3(-s, s, s),
+        Vector3(-s, -s, s),
+        Vector3(s, -s, s),
+        Vector3(s, -s, -s),
+        Vector3(-s, -s, -s),
+    };
+    for (int i = 0; i < 8; ++i)
+    {
+        points[i] = screenProjectionViewMatrix * points[i];
+    }
+    ColorRGB c = Color::White;
+    m_pRenderer->DrawLine(points[0], points[1], c);
+    m_pRenderer->DrawLine(points[1], points[2], c);
+    m_pRenderer->DrawLine(points[2], points[3], c);
+    m_pRenderer->DrawLine(points[3], points[0], c);
+    m_pRenderer->DrawLine(points[4], points[5], c);
+    m_pRenderer->DrawLine(points[5], points[6], c);
+    m_pRenderer->DrawLine(points[6], points[7], c);
+    m_pRenderer->DrawLine(points[7], points[4], c);
+    m_pRenderer->DrawLine(points[3], points[4], c);
+    m_pRenderer->DrawLine(points[0], points[5], c);
+    m_pRenderer->DrawLine(points[1], points[6], c);
+    m_pRenderer->DrawLine(points[2], points[7], c);
+
+    m_pRenderer->SetPixel(center.x, center.y, c);
 }
 
 int Game::Run ()
@@ -75,17 +114,18 @@ int Game::Run ()
     //// Create some test objects ////
 
     // Setup camera
-    m_camera.Fov(Constants::Deg2Rad(45));
+    m_camera.Fov(Constants::Deg2Rad(90));
     m_camera.Aspect(m_screenWidth/m_screenHeight);
     m_camera.Near(0.1f);
     m_camera.Far(100.f);    
-    m_camera.LookAt(Vector3(0, 0, 3));
+    m_camera.LookAt(Vector3(0, 0, 2)); // TODO: Z can't be 0 for some reason..figure that out
 
     // Add objects to scene
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
-    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));
+    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));    
+    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/cube2.obj"));
     // m_objects[0]->Translate(Vector3(-0.5f, 0, 0));
-    m_objects[0]->Rotate(0, Constants::Deg2Rad(0), 0);
+    // m_objects[0]->Rotate(0, Constants::Deg2Rad(0), 0);
     // m_objects[1]->Translate(Vector3(0.5f, 0, 0));
 
     // Setup lights
@@ -182,7 +222,18 @@ bool Game::ProcessEvents ()
                     {
                         float movement = 0.1f;
                         movement *= event.key.keysym.sym == SDLK_UP ? 1 : (event.key.keysym.sym == SDLK_DOWN ? -1 : 0);                    
-                        m_objects[0]->Translate(Vector3::Up * movement);
+                        // m_objects[0]->Translate(Vector3::Up * movement);
+                        m_camera.Translate(Vector3::Up * movement);
+                    }
+
+                    {
+                        float delta = 2.f;
+                        delta *= event.key.keysym.sym == SDLK_COMMA ? 1 : (event.key.keysym.sym == SDLK_PERIOD ? -1 : 0);
+                        float current = m_camera.Fov();
+                        float currentDegrees = Constants::Rad2Deg(current);
+                        float nextDegrees = currentDegrees + delta;                        
+                        float next = Constants::Deg2Rad(nextDegrees);
+                        m_camera.Fov(next);
                     }
                 }
                 break;
@@ -216,28 +267,38 @@ void Game::DrawWorld (float dt)
  
     Matrix4 const& screenProjectionViewMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
 
+    Matrix4 const& projectionViewMatrix = m_camera.ProjectionViewMatrix();
+
     float minZ = 200.f;
     
     for (auto&& obj : m_objects)
     {
         if (!obj) continue;
 
+        Matrix4 const modelMatrixInverseTranspose = ~obj->ModelMatrixInverse();
+
         for (auto const& face : obj->Mesh()->GetFaces())
         {
+            // Transform surface normals and compute intensity     
+            Vector3 surfaceNormal = TransformDirection(modelMatrixInverseTranspose, face.Normal()); // assumes transformation results in unit vector
+            float intensity = std::max(0.f, -Dot(m_lights[0], surfaceNormal));
+
+            // Back-face culling                        
+            if (Dot(m_camera.LookAtDirection(), surfaceNormal) >= 0) continue;
+            
             Matrix4 screenProjectionViewModelMatrix = screenProjectionViewMatrix * obj->ModelMatrix();
 
-            // TODO: Implement correct transformation of surface normals
-            // ColMatrix4 transformedNormalMatrix = screenProjectionViewMatrix * ColMatrix4(ColMatrix4::elements_array_type{face.Normal().x, face.Normal().y, face.Normal().z, 0}, false);
-            // Vector3 transformedNormal = transformedNormalMatrix.Col(0).xyz();
-            // float intensity = Dot(m_lights[0], transformedNormal);
-            float intensity = Dot(m_lights[0], face.Normal());
-
-            // TODO: Disabled until surface normals are correctly transformed
-            // Back-face culling                        
-            // if (Dot(m_camera.LookAtDirection(), face.Normal()) >= 0) continue;
-            
             // Apply perspective projection, transform to screen space while maintaining z-coordinate and also taking care of the perspective divide
             // TODO: I don't think this is working correctly....Z values after perspective projection are always greater than 1, instead of being between -1 and 1...the z-buffer technically works so the transformation is doing _something_ right but this isn't good enough because I need the range to be -1 to 1 in order to do clipping later on
+            // Vector3 v0_NDC = projectionViewMatrix * face[0].xyz();
+            // Vector3 v1_NDC = projectionViewMatrix * face[1].xyz();
+            // Vector3 v2_NDC = projectionViewMatrix * face[2].xyz();
+            // Vector3 v0 = m_viewportMatrix * v0_NDC;
+            // Vector3 v1 = m_viewportMatrix * v1_NDC;
+            // Vector3 v2 = m_viewportMatrix * v2_NDC;
+            // Vector3 _v0 = screenProjectionViewModelMatrix * face[0].xyz();
+            // Vector3 _v1 = screenProjectionViewModelMatrix * face[1].xyz();
+            // Vector3 _v2 = screenProjectionViewModelMatrix * face[2].xyz();
             Vector3 v0 = screenProjectionViewModelMatrix * face[0].xyz();
             Vector3 v1 = screenProjectionViewModelMatrix * face[1].xyz();
             Vector3 v2 = screenProjectionViewModelMatrix * face[2].xyz();
@@ -265,20 +326,23 @@ void Game::DrawWorld (float dt)
                         float v_interpolated = u * (1.f - uv0.y) + v * (1.f - uv1.y) + w * (1.f - uv2.y); // subtract y from 1 since y-axis is flipped in screen space // TODO: Why is this flipping still needed, when we no longer need to flip y-axis in screen space?
 
                         // Get color from diffuse map
-                        ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : Color::White;
+                        ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : face.DebugColor();
 
                         // Gouraud shading: interpolate normal and compute lighting intensity
-                        // TODO: Transform surface normal correctly!
-                        float intensity0 = Dot(m_lights[0], face[0].normal());
-                        float intensity1 = Dot(m_lights[0], face[1].normal());
-                        float intensity2 = Dot(m_lights[0], face[2].normal());
-                        float pixelIntensity = u * intensity0 + v * intensity1 + w * intensity2;
+                        // Assumes transformation results in unit vector
+                        float intensity0 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[0].normal()));
+                        float intensity1 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[1].normal()));
+                        float intensity2 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[2].normal()));
+                        // float intensity0 = Dot(m_lights[0], face[0].normal());
+                        // float intensity1 = Dot(m_lights[0], face[1].normal());
+                        // float intensity2 = Dot(m_lights[0], face[2].normal());
+                        float pixelIntensity = std::max(0.f, -(u * intensity0 + v * intensity1 + w * intensity2));
 
                         // Apply lighting intensity modifier
-                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -pixelIntensity); // gouraud shading
-                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, -pixelIntensity); // gouraud shading, one color
-                        // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, -intensity); // flat shading
-                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, -intensity); // flat shading, one color
+                        ColorRGB intensifiedColor = Color::Intensify(diffuseColor, pixelIntensity); // gouraud shading
+                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, pixelIntensity); // gouraud shading, one color
+                        // ColorRGB intensifiedColor = Color::Intensify(diffuseColor, intensity); // flat shading
+                        // ColorRGB intensifiedColor = Color::Intensify(Color::White, intensity); // flat shading, one color
                         // ColorRGB intensifiedColor = diffuseColor; // no shading
 
                         // Handle z-buffer
@@ -304,8 +368,10 @@ void Game::DrawWorld (float dt)
         }
     }
 
+    // DrawReferenceCube();
+
     m_pRenderer->RenderFrame();
 
-    std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
-    std::cout << "smallest z buffer value is " << minZ << std::endl;
+    // std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
+    // std::cout << "smallest z buffer value is " << minZ << std::endl;
 }
