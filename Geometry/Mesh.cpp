@@ -46,6 +46,8 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
     };
     std::vector<FaceDef> faces;
 
+    bool vtIsDefined = false, vnIsDefined = false;
+
     // Read each line
     const uint bufSize = 1024;
     char buf[1024];
@@ -80,6 +82,8 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
             {
                 if (tokens.size() > 3)
                 {
+                    vtIsDefined = true;
+
                     float uv[2];
                     for (int i = 0; i < 2; i++)
                     {
@@ -94,6 +98,8 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
             {
                 if (tokens.size() > 3)
                 {
+                    vnIsDefined = true;
+
                     float normals[3];
                     for (int i = 0; i < 3; i++)
                     {
@@ -147,8 +153,10 @@ std::unique_ptr<Mesh> Mesh::MakeFromOBJ (std::string const& fileName)
             {
                 // OBJ file indices start from 1, so we have to compensate
                 expandedVertices[i].m_xyz = vertices[faceDef.vertexIds[i] - 1];
-                expandedVertices[i].m_uv =  vertexTextureCoords[faceDef.vtIds[i] - 1];
-                expandedVertices[i].m_normal = vertexNormals[faceDef.vnIds[i] - 1];
+                if (vtIsDefined)
+                    expandedVertices[i].m_uv =  vertexTextureCoords[faceDef.vtIds[i] - 1];
+                if (vnIsDefined)
+                    expandedVertices[i].m_normal = vertexNormals[faceDef.vnIds[i] - 1];
             }
 
             // Create the face from the vertices, compute surface normal, etc.

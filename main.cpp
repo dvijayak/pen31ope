@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <sstream>
+#include <cstdlib>
+#include <ctime>
 
 #define SDL_MAIN_HANDLED
 
@@ -39,6 +41,10 @@ int main (int argc, char** argv)
     SDL_SetMainReady();
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII
     pSDL->Initialize(argv[0], WIDTH, HEIGHT);
+
+    // Inititalize RNGs
+    // srand(time(nullptr));
+    srand(0xff12ffcc);
 
     // Initialize and run the game
     // The block ensures that game-related resources are released as soon as the game

@@ -7,6 +7,7 @@
 #include <string>
 
 #include "Vector.hpp"
+#include "Color.hpp"
 
 /**
  * Triangular mesh of a 3D object
@@ -38,11 +39,15 @@ public:
     private:
         vertices_type m_vertices;
         Vector3 m_normal;
+        ColorRGB m_debugColor;
 
         friend class Mesh;
 
     public:
-        Triangle (vertices_type const& vertices) : m_vertices(vertices) {}
+        Triangle (vertices_type const& vertices)
+            : m_vertices(vertices)
+            , m_debugColor(Color::Random())
+        {}
 
         Vertex const& operator[] (uint8_t const index) const
         {
@@ -50,6 +55,8 @@ public:
         }
 
         Vector3 const& Normal () const { return m_normal; }
+        
+        ColorRGB DebugColor () const { return m_debugColor; }
     };
 
     typedef Triangle face_type;
@@ -61,6 +68,7 @@ private:
 public:
     Mesh () {}
     faces_type const& GetFaces () const { return m_faces; }
+
 
     // TODO: Should separate into a MeshLoader interface
     static std::unique_ptr<Mesh> MakeFromOBJ (std::string const& fileName);
