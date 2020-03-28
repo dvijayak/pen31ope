@@ -59,12 +59,10 @@ public:
     */
    inline Numeric& operator[] (uint const index)
    {
-      assert(index < N && "Invalid index into the components of the vector");
       return m_components[index];
    }
    inline Numeric operator[] (uint const index) const
    {
-      assert(index < N && "Invalid index into the components of the vector");
       return m_components[index];
    }
 };
@@ -110,13 +108,11 @@ public:
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
-      assert(index < 3 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[3]) == sizeof(Vector<Numeric, 3>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
    inline Numeric operator[] (uint const index) const
    {
-      assert(index < 3 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[3]) == sizeof(Vector<Numeric, 3>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
@@ -170,13 +166,11 @@ public:
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
-      assert(index < 2 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[2]) == sizeof(Vector<Numeric, 2>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
    inline Numeric operator[] (uint const index) const
    {
-      assert(index < 2 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[2]) == sizeof(Vector<Numeric, 2>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
@@ -219,13 +213,11 @@ public:
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
-      assert(index < 4 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[4]) == sizeof(Vector<Numeric, 4>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
    inline Numeric operator[] (uint const index) const
    {
-      assert(index < 4 && "Invalid index into the components of the vector");
       static_assert(sizeof(Numeric[4]) == sizeof(Vector<Numeric, 4>), "Vector struct is not laid out in memory as an array; cannot cast struct to array");
       return (&x)[index];
    }
