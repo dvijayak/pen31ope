@@ -157,7 +157,7 @@ int Game::Run ()
         ss << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
         OutputDebugStringA(ss.str().c_str());
         #else
-        // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
         #endif
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
@@ -212,29 +212,32 @@ bool Game::ProcessEvents ()
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 // TODO: Just for testing
+                if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT)
                 {
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
                     // m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
                     // m_camera.Move(Vector3::Left * movement);
                     m_objects[0]->Rotate(0, -movement, 0); // TODO: Why does rotating the OBJECT cause the shading from the light source to adjust as if the CAMERA or the LIGHT were being rotated??? I suspect this has to do with incorrect surface normal transformation...
+                }
 
-                    {
-                        float movement = 0.1f;
-                        movement *= event.key.keysym.sym == SDLK_UP ? 1 : (event.key.keysym.sym == SDLK_DOWN ? -1 : 0);                    
-                        // m_objects[0]->Translate(Vector3::Up * movement);
-                        m_camera.Translate(Vector3::Up * movement);
-                    }
+                if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_DOWN)
+                {
+                    float movement = 0.1f;
+                    movement *= event.key.keysym.sym == SDLK_UP ? 1 : (event.key.keysym.sym == SDLK_DOWN ? -1 : 0);                    
+                    // m_objects[0]->Translate(Vector3::Up * movement);
+                    m_camera.Translate(Vector3::Up * movement);
+                }
 
-                    {
-                        float delta = 2.f;
-                        delta *= event.key.keysym.sym == SDLK_COMMA ? 1 : (event.key.keysym.sym == SDLK_PERIOD ? -1 : 0);
-                        float current = m_camera.Fov();
-                        float currentDegrees = Constants::Rad2Deg(current);
-                        float nextDegrees = currentDegrees + delta;                        
-                        float next = Constants::Deg2Rad(nextDegrees);
-                        m_camera.Fov(next);
-                    }
+                if (event.key.keysym.sym == SDLK_COMMA || event.key.keysym.sym == SDLK_PERIOD)
+                {
+                    float delta = 2.f;
+                    delta *= event.key.keysym.sym == SDLK_COMMA ? 1 : (event.key.keysym.sym == SDLK_PERIOD ? -1 : 0);
+                    float current = m_camera.Fov();
+                    float currentDegrees = Constants::Rad2Deg(current);
+                    float nextDegrees = currentDegrees + delta;                        
+                    float next = Constants::Deg2Rad(nextDegrees);
+                    m_camera.Fov(next);
                 }
                 break;
             case SDL_MOUSEMOTION:
