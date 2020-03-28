@@ -130,6 +130,7 @@ int Game::Run ()
 
     // Setup lights
     m_lights.push_back(Normalized(Vector3::Backward));
+    // m_lights.push_back(Normalized(Vector3(0, -2, -2)));
     // m_lights.push_back(Normalized(Vector3(20, 0, -3)));
     // m_lights.push_back(Normalized(Vector3::Forward));
 
@@ -212,11 +213,24 @@ bool Game::ProcessEvents ()
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 // TODO: Just for testing
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_w:
+                    case SDLK_a:
+                    case SDLK_s:
+                    case SDLK_d:
+                    {
+                        float factor = 0.1f;
+                        float horzMovement = factor * (event.key.keysym.sym == SDLK_d ? 1 : (event.key.keysym.sym == SDLK_a ? -1 : 0));
+                        float vertMovement = factor * (event.key.keysym.sym == SDLK_w ? 1 : (event.key.keysym.sym == SDLK_s ? -1 : 0));                        
+                        m_lights[0] = Normalized(m_lights[0] + Vector3(horzMovement, vertMovement, 0));
+                    }
+                }
+
                 if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT)
                 {
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
-                    // m_lights[0] = Normalized(m_lights[0] + (Vector3::Left * movement));
                     // m_camera.Move(Vector3::Left * movement);
                     m_objects[0]->Rotate(0, -movement, 0); // TODO: Why does rotating the OBJECT cause the shading from the light source to adjust as if the CAMERA or the LIGHT were being rotated??? I suspect this has to do with incorrect surface normal transformation...
                 }
@@ -336,9 +350,6 @@ void Game::DrawWorld (float dt)
                         float intensity0 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[0].normal()));
                         float intensity1 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[1].normal()));
                         float intensity2 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[2].normal()));
-                        // float intensity0 = Dot(m_lights[0], face[0].normal());
-                        // float intensity1 = Dot(m_lights[0], face[1].normal());
-                        // float intensity2 = Dot(m_lights[0], face[2].normal());
                         float pixelIntensity = std::max(0.f, -(u * intensity0 + v * intensity1 + w * intensity2));
 
                         // Apply lighting intensity modifier
