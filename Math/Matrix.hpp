@@ -142,6 +142,79 @@ public:
 	}
 };
 
+//// Typedefs ////
+
+typedef Matrix<float, 3, 1> ColMatrix3;
+typedef Matrix<float, 1, 3> RowMatrix3;
+typedef Matrix<float, 2, 1> ColMatrix2;
+typedef Matrix<float, 1, 2> RowMatrix2;
+typedef Matrix<float, 4, 1> ColMatrix4;
+typedef Matrix<float, 1, 4> RowMatrix4;
+typedef Matrix<float, 2, 2> Matrix2;
+typedef Matrix<float, 3, 3> Matrix3;
+typedef Matrix<float, 4, 4> Matrix4;
+
+typedef Matrix<int, 3, 1> ColMatrix3Int;
+typedef Matrix<int, 1, 3> RowMatrix3Int;
+typedef Matrix<int, 2, 1> ColMatrix2Int;
+typedef Matrix<int, 1, 2> RowMatrix2Int;
+typedef Matrix<int, 2, 2> Matrix2Int;
+typedef Matrix<int, 3, 3> Matrix3Int;
+typedef Matrix<int, 4, 4> Matrix4Int;
+
+typedef Matrix<uint, 3, 1> ColMatrix3UInt;
+typedef Matrix<uint, 1, 3> RowMatrix3UInt;
+typedef Matrix<uint, 2, 1> ColMatrix2UInt;
+typedef Matrix<uint, 1, 2> RowMatrix2UInt;
+typedef Matrix<uint, 2, 2> Matrix2UInt;
+typedef Matrix<uint, 3, 3> Matrix3UInt;
+typedef Matrix<uint, 4, 4> Matrix4UInt;
+
+typedef Matrix<uint8_t, 3, 1> ColMatrix3Byte;
+typedef Matrix<uint8_t, 1, 3> RowMatrix3Byte;
+typedef Matrix<uint8_t, 2, 1> ColMatrix2Byte;
+typedef Matrix<uint8_t, 1, 2> RowMatrix2Byte;
+typedef Matrix<uint8_t, 2, 2> Matrix2Byte;
+typedef Matrix<uint8_t, 3, 3> Matrix3Byte;
+typedef Matrix<uint8_t, 4, 4> Matrix4Byte;
+
+template <typename Numeric, uint R, uint C>
+std::ostream& operator<< (std::ostream& os, const Matrix<Numeric, R, C>& A)
+{
+	os << "[";
+		
+	for (int r = 0; r < R; ++r)
+	{
+		for (int c = 0; c < C; ++c)
+		{
+			os << A(r, c);
+			if (c < C-1)
+				os << "  ";
+		}
+
+		if (r < R-1)
+			os << std::endl << " ";
+	}
+	os << "]";
+
+	return os;
+}
+
+//// Convenience constructors, as free functions ////
+
+template <typename Numeric, uint N>
+Matrix<Numeric, N, N> MakeMatrix (Matrix<Numeric, N-1, N-1> A)
+{
+	Matrix<Numeric, N, N> result(Matrix<Numeric, N, N>::Identity());
+	for (int r = 0; r < N-1; ++r)
+	{
+		for (int c = 0; c < N-1; ++c)
+		{
+			result(r,c) = A(r,c);
+		}
+	}
+}
+
 //// Operations, as free functions ////
 
 /**
@@ -257,13 +330,20 @@ Matrix<Numeric, M, P> operator* (Matrix<Numeric, M, N> const& A, Matrix<Numeric,
 
 	Matrix<Numeric, M, P> result;
 	for (int r = 0; r < M; ++r)
-	{
 		for (int c = 0; c < P; ++c)
-		{
-			result(r, c) = static_cast<Numeric>(Dot<Numeric, N>(A(r), B.Col(c)));
-		}
-	}
+			for (uint i = 0; i < N; ++i)
+				result(r,c) += A(r,i) * B(i,c);
 	return result;
+}
+
+template <typename Numeric, uint N>
+Matrix<Numeric, N, N> & operator*= (Matrix<Numeric, N, N> & A, Matrix<Numeric, N, N> const& B)
+{
+	for (int r = 0; r < N; ++r)
+		for (int c = 0; c < N; ++c)
+			for (int i = 0; i < N; ++i)
+				A(r,c) += A(r,i) * B(i,c);
+	return A;
 }
 
 /**
@@ -274,9 +354,8 @@ Vector<Numeric, M> operator* (Matrix<Numeric, M, N> const& A, Vector<Numeric, N>
 {
 	Vector<Numeric, M> result;
 	for (int i = 0; i < M; ++i)
-	{
-		result[i] = static_cast<Numeric>(Dot<Numeric, N>(A(i), v));
-	}
+		for (int j = 0; j < N; ++j)
+			result[i] += A(i,j) * v[j];
 	return result;
 }
 
@@ -357,62 +436,45 @@ float Determinant (Matrix<Numeric, 4, 4> const& A)
          A(0,1) * A(1,0) * A(2,2) * A(3,3) + A(0,0) * A(1,1) * A(2,2) * A(3,3);
 }
 
-template <typename Numeric, uint R, uint C>
-std::ostream& operator<< (std::ostream& os, const Matrix<Numeric, R, C>& A)
+/**
+ * Calculate square matrix inverse assuming it is orthogonal. The inverse of an orthogonal matrix is simply its transpose!
+ */
+template <typename Numeric, uint N>
+Matrix<Numeric, N, N> Inverse_Orthogonal (Matrix<Numeric, N, N> const& A)
 {
-	os << "[";
-		
-	for (int r = 0; r < R; ++r)
-	{
-		for (int c = 0; c < C; ++c)
-		{
-			os << A(r, c);
-			if (c < C-1)
-				os << "  ";
-		}
-
-		if (r < R-1)
-			os << std::endl << " ";
-	}
-	os << "]";
-
-	return os;
+	return ~A;
 }
 
-//// Typedefs ////
+/**
+ * Calculate inverse of 4x4 homogenous transformation assuming it contains just a rotation and a translation.
+ * 
+ * We use the same trick as with change-of-basis matrix calculations, namely M^-1 = (T * R)^-1 = R^-1 * T^-1
+ * \see Camera::LookAt
+ */
+template <typename Numeric>
+Matrix<Numeric, 4, 4> Inverse_RotationTranslation (Matrix<Numeric, 4, 4> const& A)
+{	
+	typedef Matrix<Numeric, 4 , 4> matrix_type;
 
-typedef Matrix<float, 3, 1> ColMatrix3;
-typedef Matrix<float, 1, 3> RowMatrix3;
-typedef Matrix<float, 2, 1> ColMatrix2;
-typedef Matrix<float, 1, 2> RowMatrix2;
-typedef Matrix<float, 4, 1> ColMatrix4;
-typedef Matrix<float, 1, 4> RowMatrix4;
-typedef Matrix<float, 2, 2> Matrix2;
-typedef Matrix<float, 3, 3> Matrix3;
-typedef Matrix<float, 4, 4> Matrix4;
+	matrix_type rotation(typename matrix_type::elements_array_type({
+		A(0,0), A(0,1), A(0,2), 0,
+		A(1,0), A(1,1), A(1,2), 0,
+		A(2,0), A(2,1), A(2,2), 0,
+			  0,		 0, 		0, 1
+	}));	
 
-typedef Matrix<int, 3, 1> ColMatrix3Int;
-typedef Matrix<int, 1, 3> RowMatrix3Int;
-typedef Matrix<int, 2, 1> ColMatrix2Int;
-typedef Matrix<int, 1, 2> RowMatrix2Int;
-typedef Matrix<int, 2, 2> Matrix2Int;
-typedef Matrix<int, 3, 3> Matrix3Int;
-typedef Matrix<int, 4, 4> Matrix4Int;
+	matrix_type inverseOfTranslation(typename matrix_type::elements_array_type({
+      1, 0, 0, -A(0,3),
+      0, 1, 0, -A(1,3),
+      0, 0, 1, -A(2,3),
+      0, 0, 0,      1
+   }));
 
-typedef Matrix<uint, 3, 1> ColMatrix3UInt;
-typedef Matrix<uint, 1, 3> RowMatrix3UInt;
-typedef Matrix<uint, 2, 1> ColMatrix2UInt;
-typedef Matrix<uint, 1, 2> RowMatrix2UInt;
-typedef Matrix<uint, 2, 2> Matrix2UInt;
-typedef Matrix<uint, 3, 3> Matrix3UInt;
-typedef Matrix<uint, 4, 4> Matrix4UInt;
+	return Inverse_Orthogonal(rotation) * inverseOfTranslation;
+}
 
-typedef Matrix<uint8_t, 3, 1> ColMatrix3Byte;
-typedef Matrix<uint8_t, 1, 3> RowMatrix3Byte;
-typedef Matrix<uint8_t, 2, 1> ColMatrix2Byte;
-typedef Matrix<uint8_t, 1, 2> RowMatrix2Byte;
-typedef Matrix<uint8_t, 2, 2> Matrix2Byte;
-typedef Matrix<uint8_t, 3, 3> Matrix3Byte;
-typedef Matrix<uint8_t, 4, 4> Matrix4Byte;
+//// Super specialized operations ////
+
+Vector3 TransformDirection (Matrix4 const& A, Vector3 const& u);
 
 #endif

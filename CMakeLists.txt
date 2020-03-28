@@ -22,6 +22,7 @@ add_executable(pen31ope
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
     Geometry/SDLTextureLoader.cpp
+    Math/Matrix.cpp
     Scene/Camera.cpp
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
