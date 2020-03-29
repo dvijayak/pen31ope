@@ -32,7 +32,10 @@ public:
    ColorRGB Map (Vector2 const& uv ) const { return Map(uv.x, uv.y); }
    ColorRGB Map (float const u, float const v) const
    {
-      uint index = static_cast<uint>(u * m_width) + static_cast<uint>(v * m_height) * m_height;
+      // u,v coordinates map 0,0 to the bottom-left and 1,1 to the top-right corners of the texture,
+      // but pixels are stored such that 0,0 is the bottom-left and 1,1 is the *bottom*-right, i.e.
+      // the vertical axis is flipped. We account for this by flipping hte `v` coordinate.
+      uint index = static_cast<uint>(u * m_width) + static_cast<uint>((1.f - v) * m_height) * m_height; 
       return m_pixels[index];
    }
 };

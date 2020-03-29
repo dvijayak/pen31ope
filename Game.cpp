@@ -232,7 +232,7 @@ bool Game::ProcessEvents ()
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
                     // m_camera.Move(Vector3::Left * movement);
-                    m_objects[0]->Rotate(0, -movement, 0); // TODO: Why does rotating the OBJECT cause the shading from the light source to adjust as if the CAMERA or the LIGHT were being rotated??? I suspect this has to do with incorrect surface normal transformation...
+                    m_objects[0]->Rotate(0, -movement, 0);
                 }
 
                 if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_DOWN)
@@ -340,7 +340,7 @@ void Game::DrawWorld (float dt)
                         auto const& uv1 = face[1].uv();
                         auto const& uv2 = face[2].uv();
                         float u_interpolated = u * uv0.x + v * uv1.x + w * uv2.x;
-                        float v_interpolated = u * (1.f - uv0.y) + v * (1.f - uv1.y) + w * (1.f - uv2.y); // subtract y from 1 since y-axis is flipped in screen space // TODO: Why is this flipping still needed, when we no longer need to flip y-axis in screen space?
+                        float v_interpolated = u * uv0.y + v * uv1.y + w * uv2.y;
 
                         // Get color from diffuse map
                         ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : face.DebugColor();
