@@ -332,15 +332,15 @@ void Game::DrawWorld (float dt)
                 for (uint y = y_start; y <= y_end; ++y)
                 {
                     Vector3 baryCoords = TriangleUtil::BarycentricCoordinates(Vector3(x, y), v0, v1, v2);
-                    float u = baryCoords.x, v = baryCoords.y, w = baryCoords.z; // TODO: Rename bary coord names from
-                    if (u >= 0 && v >= 0 && w >= 0)
+                    float l0 = baryCoords.x, l1 = baryCoords.y, l2 = baryCoords.z;
+                    if (l0 >= 0 && l1 >= 0 && l2 >= 0)
                     {
                         // Interpolate UV
                         auto const& uv0 = face[0].uv();
                         auto const& uv1 = face[1].uv();
                         auto const& uv2 = face[2].uv();
-                        float u_interpolated = u * uv0.x + v * uv1.x + w * uv2.x;
-                        float v_interpolated = u * uv0.y + v * uv1.y + w * uv2.y;
+                        float u_interpolated = l0 * uv0.x + l1 * uv1.x + l2 * uv2.x;
+                        float v_interpolated = l0 * uv0.y + l1 * uv1.y + l2 * uv2.y;
 
                         // Get color from diffuse map
                         ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : face.DebugColor();
@@ -350,7 +350,7 @@ void Game::DrawWorld (float dt)
                         float intensity0 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[0].normal()));
                         float intensity1 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[1].normal()));
                         float intensity2 = Dot(m_lights[0], TransformDirection(modelMatrixInverseTranspose, face[2].normal()));
-                        float pixelIntensity = std::max(0.f, -(u * intensity0 + v * intensity1 + w * intensity2));
+                        float pixelIntensity = std::max(0.f, -(l0 * intensity0 + l1 * intensity1 + l2 * intensity2));
 
                         // Apply lighting intensity modifier
                         ColorRGB intensifiedColor = Color::Intensify(diffuseColor, pixelIntensity); // gouraud shading
@@ -367,7 +367,7 @@ void Game::DrawWorld (float dt)
                         else
                         {
                             // Interpolate z-buffer
-                            float z = u * v0.z + v * v1.z + w * v2.z;
+                            float z = l0 * v0.z + l1 * v1.z + l2 * v2.z;
                             uint index = y * m_screenWidth + x;
                             if (z >= m_zBuffer[index])
                             {
