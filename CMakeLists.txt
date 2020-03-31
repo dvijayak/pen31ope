@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 project(pen31ope)
 
-set (CMAKE_CXX_STANDARD 14)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
+message(STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
+
+set (CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeMods/")
 find_package(SDL2 REQUIRED)
 find_package(SDL2_Image REQUIRED)
+find_package(Lua REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIRS}
+include_directories(${SDL2_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
     "3rdParty"
     "Common"
     "Core"
@@ -27,7 +33,7 @@ add_executable(pen31ope
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
     )
-target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS})
+target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${LUA_LIBRARIES})
 
 # Assets
 file(COPY models DESTINATION ${CMAKE_BINARY_DIR})

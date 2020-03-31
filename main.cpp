@@ -14,9 +14,22 @@
 uint WIDTH = 1024;
 uint HEIGHT = 768;
 
+#include <sol/sol.hpp>
+#include <cassert>
+
 int main (int argc, char** argv)
 {
     // INITIALIZE_BASIC_LOGGERS();
+
+    // TODO: BEGIN TEST
+    // Basic Lua embed proof-of-concept
+    // IT WORKS!
+    sol::state lua;
+    int x = 0;
+    lua.set_function("beep", [&x]{ ++x <<= 10; });
+    lua.script("beep()");
+    assert(x == 1024);
+    // TODO: END TEST
 
     // Command-line args
     if (argc >= 3)
