@@ -1,6 +1,8 @@
 # Concepts Practiced So Far
 
 - Cross-platform project configuration using CMake (Windows, macOS, Linux/Ubuntu)
+- Lua scripting
+   - Game settings
 - Rasterizing lines using Bresenham's line algorithm
 - Linear interpolation (lerping)
 - OBJ file loading
@@ -44,7 +46,7 @@
 
 This serves as a high-level TODO list, in no particular order.
 
-- Primitive 3D objecs
+- Primitive 3D objects
    - Cube
    - Sphere
    - Plane
@@ -87,6 +89,8 @@ This serves as a high-level TODO list, in no particular order.
    - Slider
    - Dropdown menu
 - Animation
+- Lua scripting
+   - Scene definition
 
 Crown jewel, if I get far enough:
 - Water rendering

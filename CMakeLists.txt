@@ -20,6 +20,7 @@ include_directories(${SDL2_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
     "Geometry"
     "Math"
     "Scene"
+    "Settings"
 )
 add_executable(pen31ope
     main.cpp
@@ -32,11 +33,26 @@ add_executable(pen31ope
     Scene/Camera.cpp
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
+    Settings/LuaAppSettingsFactory.cpp
     )
 target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${LUA_LIBRARIES})
 
 # Assets
 file(COPY models DESTINATION ${CMAKE_BINARY_DIR})
+
+# Scripts
+file(GLOB GAME_SCRIPTS scripts/*)
+if(WIN32)
+    file(COPY ${GAME_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
+else()
+    foreach(SCRIPT ${GAME_SCRIPTS})
+        get_filename_component(SCRIPT_FILE ${SCRIPT} NAME)
+        message(STATUS ${SCRIPT})
+        message(STATUS ${SCRIPT_FILE})
+        message(STATUS "${CMAKE_BINARY_DIR}/${SCRIPT}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${SCRIPT} "${CMAKE_BINARY_DIR}/${SCRIPT_FILE}")
+    endforeach()
+endif()
 
 # Copy SDL2 DLLs to output folder on Windows
 # Thanks to https://github.com/preshing/CMakeDemo/blob/master/CMakeLists.txt#L21

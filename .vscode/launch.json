@@ -9,7 +9,6 @@
          "type": "cppdbg",
          "request": "launch",
          "program": "${workspaceFolder}/build/pen31ope",
-         "args": ["800", "800"],
          "stopAtEntry": false,
          "cwd": "${workspaceFolder}/build",
          "environment": [],

@@ -21,7 +21,7 @@ public:
     SDLRenderer ();
     virtual ~SDLRenderer ();
 
-    void Initialize (std::string windowTitle, uint width, uint height);
+    void Initialize (std::string windowTitle, uint width, uint height, int windowFlags=SDL_WINDOW_RESIZABLE);
 
     /// IRenderer - Basic
     void SetPixel (uint index, ColorRGB color=Color::Black) override;

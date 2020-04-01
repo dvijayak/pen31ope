@@ -1,10 +1,10 @@
 {
     "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/CVS": true,
         "**/.DS_Store": true,
+        "**/.git": true,
+        "**/.hg": true,
+        "**/.svn": true,
+        "**/CVS": true,
         "build": true,
         "3rdParty": false
     },
@@ -83,7 +83,9 @@
         "random": "cpp",
         "bit": "cpp",
         "memory_resource": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "forward_list": "cpp",
+        "variant": "cpp"
     },
     "cmake.configureOnOpen": false
 }

@@ -26,7 +26,7 @@ static void DumpSDLVersion ()
     std::cout << "We are linking against SDL version " << linked.major << ", " << linked.minor << ", " << linked.patch << std::endl;
 }
 
-void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
+void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height, int windowFlags)
 {
     // TODO: Doesn't show the version, not sure why
     // DumpSDLVersion();
@@ -41,7 +41,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height)
         SDL_WINDOWPOS_CENTERED,
         width,
         height,
-        SDL_WINDOW_RESIZABLE
+        windowFlags
         // SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN
         );
 

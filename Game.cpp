@@ -116,7 +116,7 @@ int Game::Run ()
     // Setup camera
     m_camera.Fov(Constants::Deg2Rad(90));
     m_camera.Aspect(m_screenWidth/m_screenHeight);
-    m_camera.Near(0.1f);
+    m_camera.Near(1.f);
     m_camera.Far(100.f);    
     m_camera.LookAt(Vector3(0, 0, 2)); // TODO: Z can't be 0 for some reason..figure that out
 
@@ -158,7 +158,7 @@ int Game::Run ()
         ss << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
         OutputDebugStringA(ss.str().c_str());
         #else
-        std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
+        // std::cout << "elapsed = " << elapsed << ", lag = " << lag << std::endl;
         #endif
     
         // Process all events in the SDL event queue; this is also the point at which the game loop can be exited
@@ -307,9 +307,9 @@ void Game::DrawWorld (float dt)
 
             // Apply perspective projection, transform to screen space while maintaining z-coordinate and also taking care of the perspective divide
             // TODO: I don't think this is working correctly....Z values after perspective projection are always greater than 1, instead of being between -1 and 1...the z-buffer technically works so the transformation is doing _something_ right but this isn't good enough because I need the range to be -1 to 1 in order to do clipping later on
-            // Vector3 v0_NDC = projectionViewMatrix * face[0].xyz();
-            // Vector3 v1_NDC = projectionViewMatrix * face[1].xyz();
-            // Vector3 v2_NDC = projectionViewMatrix * face[2].xyz();
+            Vector3 v0_NDC = projectionViewMatrix * face[0].xyz();
+            Vector3 v1_NDC = projectionViewMatrix * face[1].xyz();
+            Vector3 v2_NDC = projectionViewMatrix * face[2].xyz();
             // Vector3 v0 = m_viewportMatrix * v0_NDC;
             // Vector3 v1 = m_viewportMatrix * v1_NDC;
             // Vector3 v2 = m_viewportMatrix * v2_NDC;
@@ -386,6 +386,6 @@ void Game::DrawWorld (float dt)
 
     m_pRenderer->RenderFrame();
 
-    // std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
-    // std::cout << "smallest z buffer value is " << minZ << std::endl;
+    std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
+    std::cout << "smallest z buffer value is " << minZ << std::endl;
 }

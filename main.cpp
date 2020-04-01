@@ -6,54 +6,55 @@
 #include <ctime>
 
 #define SDL_MAIN_HANDLED
-
 #include "SDLRenderer.hpp"
-#include "Game.hpp"
+
 #include "Logger.hpp"
+#include "Game.hpp"
 
-uint WIDTH = 1024;
-uint HEIGHT = 768;
+#include "AppSettings.hpp"
+#include "LuaAppSettingsFactory.hpp"
 
-#include <sol/sol.hpp>
-#include <cassert>
+pen31ope::AppSettings defaultSettings = {
+    "scene.lua",
+    1024, 768,
+    pen31ope::WindowedMode::WINDOWED
+};
 
 int main (int argc, char** argv)
 {
     // INITIALIZE_BASIC_LOGGERS();
 
-    // TODO: BEGIN TEST
-    // Basic Lua embed proof-of-concept
-    // IT WORKS!
-    sol::state lua;
-    int x = 0;
-    lua.set_function("beep", [&x]{ ++x <<= 10; });
-    lua.script("beep()");
-    assert(x == 1024);
-    // TODO: END TEST
+    std::string settingsFile;
 
     // Command-line args
-    if (argc >= 3)
+    if (argc >= 2)
     {
-        // Set game graphics resolution
-        uint width, height;
-
-        std::stringstream ss_w(argv[1]), ss_h(argv[2]);
-        ss_w >> width;
-        ss_h >> height;
-
-        if (width > 0 && width <= 3840)
-        {
-            WIDTH = width;
-        }
-        if (height > 0 && height <= 3840)
-        {
-            HEIGHT = height;
-        }
+        settingsFile = argv[1];
     }
+    if (settingsFile.empty())
+    {
+        settingsFile = "settings.lua";
+    }
+
+    pen31ope::AppSettings settings = defaultSettings;
+    {
+        // Load application settings from config script
+        std::unique_ptr<IAppSettingsFactory> settingsFactory = std::make_unique<LuaAppSettingsFactory>();
+        auto rc = settingsFactory->ReadFromFile(settingsFile);
+        if (!rc)
+        {
+            std::cerr << "Failed to load settings from file " << settingsFile << std::endl;
+        }
+        else
+        {
+            settings = *rc.value;
+        }    
+    }
+    pen31ope::AppSettings::Validate(settings);
 
     SDL_SetMainReady();
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII
-    pSDL->Initialize(argv[0], WIDTH, HEIGHT);
+    pSDL->Initialize(argv[0], settings.screenWidth, settings.screenHeight);
 
     // Inititalize RNGs
     // srand(time(nullptr));
@@ -68,8 +69,8 @@ int main (int argc, char** argv)
 
         // Configuration
         game.SetRenderer(pSDL.get());
-        game.SetScreenWidth(WIDTH);
-        game.SetScreenHeight(HEIGHT);
+        game.SetScreenWidth(settings.screenWidth);
+        game.SetScreenHeight(settings.screenHeight);
 
         // Go!
         rc = game.Run();
