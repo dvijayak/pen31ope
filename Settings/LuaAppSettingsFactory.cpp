@@ -3,19 +3,16 @@
 #include "SDL.h"
 
 LuaAppSettingsFactory::LuaAppSettingsFactory ()
-{
-   m_lua.open_libraries(sol::lib::base, sol::lib::package);
-}
+{}
 
 pen31ope::AppSettings::LoadResult LuaAppSettingsFactory::ReadFromFile (std::string const& fileName)
 {
    pen31ope::AppSettings::LoadResult rc;   
 
-   auto result = m_lua.script_file(fileName, &sol::script_default_on_error);
-   if (!result.valid())
+   if (!_.LoadFromFile(fileName))
       return rc;
 
-   auto config = m_lua["_"];
+   auto config = _.lua["_"];
    if (!config.valid())
       return rc;
 

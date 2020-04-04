@@ -3,11 +3,11 @@
 
 #include "IAppSettingsFactory.hpp"
 
-#include "sol/sol.hpp"
+#include "LuaContext.hpp"
 
 class LuaAppSettingsFactory : virtual public IAppSettingsFactory
 {
-   sol::state m_lua;
+   LuaContext _;
 
 public:
    LuaAppSettingsFactory ();

@@ -25,6 +25,9 @@
 #include "Mesh.hpp"
 #include "Triangle.hpp"
 
+#include "ICameraFactory.hpp"
+#include "LuaCameraFactory.hpp"
+
 constexpr uint MAX_FPS = 240;
 constexpr uint MIN_FPS = 15;
 
@@ -33,6 +36,12 @@ Game::Game ()
     , m_fixedUpdateTimeStep(1000/m_targetFrameRate)
     , m_pRenderer(0)
 {
+    std::unique_ptr<ICameraFactory> pCameraFactory = std::make_unique<LuaCameraFactory>();
+    auto pCamera = pCameraFactory->MakeFromFile("scene.lua");
+    if (pCamera)
+    {
+        m_camera = *pCamera;
+    }
 }
 
 Game::~Game ()
@@ -122,13 +131,6 @@ void Game::DrawReferenceCube (Vector3 const& center, float const s)
 int Game::Run ()
 {    
     //// Create some test objects ////
-
-    // Setup camera
-    m_camera.Fov(Constants::Deg2Rad(90));
-    m_camera.Aspect(m_screenWidth/m_screenHeight);
-    m_camera.Near(0.1f);
-    m_camera.Far(100.f);
-    m_camera.LookAt(Vector3(0, 0, 2)); // TODO: Z can't be 0 for some reason..figure that out
 
     // Add objects to scene
     m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));

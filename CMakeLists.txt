@@ -18,6 +18,7 @@ include_directories(${SDL2_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
     "Common"
     "Core"
     "Geometry"
+    "Lua"
     "Math"
     "Scene"
     "Settings"
@@ -29,10 +30,12 @@ add_executable(pen31ope
     Core/SDLRenderer.cpp
     Geometry/Mesh.cpp
     Geometry/SDLTextureLoader.cpp
+    Lua/LuaContext.cpp
     Math/Matrix.cpp
     Scene/Camera.cpp
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
+    Scene/LuaCameraFactory.cpp
     Settings/LuaAppSettingsFactory.cpp
     )
 target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${LUA_LIBRARIES})
