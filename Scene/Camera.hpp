@@ -62,10 +62,12 @@ public:
    {
       assert(f > 0);
       assert(f > m_zNearPlaneDistance);
+      m_zFarPlaneDistance = f;
       UpdatePerspectiveProjectionMatrix();
    }
 
    Matrix4 const& ViewMatrix () const { return m_viewMatrix; }
+   Matrix4 const& ProjectionMatrix () const { return m_perspectiveProjectionMatrix; }
    Matrix4 const& ProjectionViewMatrix () const { return m_projectionViewMatrix; }
 
    Vector3 const& Position() const { return m_position; }

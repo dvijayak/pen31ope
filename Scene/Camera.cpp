@@ -68,7 +68,7 @@ void Camera::UpdatePerspectiveProjectionMatrix ()
    m_perspectiveProjectionMatrix = Matrix4(Matrix4::elements_array_type{
       e, 0, 0, 0,
       0, e/a, 0, 0,
-      0, 0, -(f+n)/(f-n), (2*n*f)/(f-n), // TODO: The book says that the 2nf/f-n expression should be -(2nf)/f-n, but the `-` doesn't work properly...it works properly if I remove it though....but then my projected z coords are NOT in NDC...I'm confused 
+      0, 0, -(f+n)/(f-n), -(2*n*f)/(f-n),
       0, 0, -1, 0   
    });
 

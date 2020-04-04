@@ -43,18 +43,6 @@ public:
    }
 
    /**
-    * Update all elements of this vector to be the given value; must be reimplemented by specializations that wish to support this assignment
-    */
-   Vector<Numeric, N>& operator= (Numeric const k)
-   {
-      for (uint i = 0; i < N; ++i)
-      {
-         m_components[i] = k;
-      }
-      return *this;
-   }
-
-   /**
     * Generic component read/write access; must be reimplemented by all specializations
     */
    inline Numeric& operator[] (uint const index)
@@ -94,16 +82,6 @@ public:
    explicit Vector (Numeric const k)
       : x(k), y(k), z(k)
    {}
-
-   // explicit Vector (Vector<Numeric, 2> const& other2D)
-   //    : m_x(other2D.x, other2D.y)
-   // {}
-
-   Vector<Numeric, 3>& operator= (Numeric const k)
-   {
-      x = k, y = k, z = k;
-      return *this;
-   }
 
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
@@ -157,12 +135,6 @@ public:
       : x(k), y(k)
    {}
 
-   Vector<Numeric, 2>& operator= (Numeric const k)
-   {
-      x = k, y = k;
-      return *this;
-   }
-
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
@@ -204,12 +176,6 @@ public:
       : x(k), y(k), z(k), w(k)
    {}
 
-   Vector<Numeric, 4>& operator= (Numeric const k)
-   {
-      x = k, y = k, z = k, w = k;
-      return *this;
-   }
-
    // Reimplemented from primary template
    inline Numeric& operator[] (uint const index)
    {
@@ -237,9 +203,28 @@ Vector<Numeric, N> ZeroVector ()
    return result;
 }
 
+template <typename Numeric, uint N>
+Vector<Numeric, N+1> HomoVector (Vector<Numeric, N> const& v, Numeric const w=static_cast<Numeric>(1))
+{
+   Vector<Numeric, N+1> result;
+   result[N] = w;
+   for (int i = 0; i < N; ++i)
+      result[i] = v[i];
+   return result;
+}
+
 //// Operations, as free functions ////
 
 /// General ///
+
+template <typename Numeric, uint N>
+Vector<Numeric, N> & Fill (Vector<Numeric, N> & v, Numeric const k)
+{
+   for (int i = 0; i < N; ++i)
+      v[i] = k;
+
+   return v;
+}
 
 /**
  * Flip direction
@@ -390,6 +375,18 @@ const auto Length = Magnitude<Numeric, N>;
 
 template <typename Numeric, uint N>
 const auto Norm = Magnitude<Numeric, N>;
+
+/**
+ * Project an N-dimensional homogeneous coordinates vector to N-1 dimensions
+ */
+template <typename Numeric, uint N>
+Vector<Numeric, N-1> ProjectToHyperspace (Vector<Numeric, N> const& v)
+{
+   Vector<Numeric, N-1> result;
+   for (int i = 0; i < N-1; ++i)
+      result[i] = v[i] / v[N-1];
+   return result;
+}
 
 /// Specific ///
 

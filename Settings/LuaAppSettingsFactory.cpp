@@ -15,7 +15,7 @@ pen31ope::AppSettings::LoadResult LuaAppSettingsFactory::ReadFromFile (std::stri
    if (!result.valid())
       return rc;
 
-   auto config = m_lua["config"];
+   auto config = m_lua["_"];
    if (!config.valid())
       return rc;
 

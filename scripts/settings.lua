@@ -1,6 +1,6 @@
-config = {
+_ = {
    screen = {
       width = 800,
       height = 800
-   }
+   },
 }

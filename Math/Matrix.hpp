@@ -86,7 +86,7 @@ public:
    {
       for (int r = 0; r < R; ++r)
       {
-         m_elements[r] = k;
+         Fill(m_elements[r], k);
       }
    }
 
@@ -372,23 +372,13 @@ template <typename Numeric, uint M>
 Vector<Numeric, M-1> operator* (Matrix<Numeric, M, M> const& A, Vector<Numeric, M-1> const& v)
 {
    // Add `1` as the Mth element of the vector
-   Vector<Numeric, M> v_homo;
-   for (int i = 0; i < M-1; ++i)
-   {
-      v_homo[i] = v[i];
-   }
-   v_homo[M-1] = 1;
+   Vector<Numeric, M> v_homo = HomoVector(v);
 
    // Do the transform
    Vector<Numeric, M> transformed = A * v_homo;
 
    // Project back into M-1 dimension
-   Vector<Numeric, M-1> result;
-   for (int i = 0; i < M-1; ++i)
-   {
-      result[i] = transformed[i] / transformed[M-1];
-   }
-   return result;
+   return ProjectToHyperspace(transformed);
 }
 
 template <typename Numeric>

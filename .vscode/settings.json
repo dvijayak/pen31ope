@@ -87,5 +87,8 @@
         "forward_list": "cpp",
         "variant": "cpp"
     },
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "Lua.diagnostics.globals": [
+        "Primitives"
+    ]
 }

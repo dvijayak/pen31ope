@@ -69,29 +69,40 @@ void Game::ResetZBuffer ()
 {
     // TODO: Investigate whether memset actually is more efficient than std::fill or not
     // memset(m_zBuffer.data(), 0, sizeof(float) * m_zBuffer.size());
-    std::fill(m_zBuffer.begin(), m_zBuffer.end(), std::numeric_limits<float>::lowest()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
+    std::fill(m_zBuffer.begin(), m_zBuffer.end(), std::numeric_limits<float>::max()); // don't use `min()`, as it doesn't work as expected for floating-point type; cf. https://en.cppreference.com/w/cpp/types/numeric_limits/lowest);
 }
 
-void Game::DrawReferenceCube (Vector3 const& position, float const s)
+void Game::DrawReferenceCube (Vector3 const& center, float const s)
 {
-    Matrix4 const& screenProjectionViewMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
+    Matrix4 const& viewMatrix = m_camera.ViewMatrix();
+    Matrix4 const& projectionMatrix = m_camera.ProjectionMatrix();
+    Matrix4 const& viewportMatrix = m_viewportMatrix;
 
-    // Draw world origin + reference cube
-    Vector3 center = screenProjectionViewMatrix * position;
-    std::array<Vector3, 8> points{
-        Vector3(s, s, s),
-        Vector3(s, s, -s),
-        Vector3(-s, s, -s),
-        Vector3(-s, s, s),
-        Vector3(-s, -s, s),
-        Vector3(s, -s, s),
-        Vector3(s, -s, -s),
-        Vector3(-s, -s, -s),
+    // Draw reference cube
+    std::array<Vector3, 9> pointsV;
+    std::array<Vector4, 9> pointsNDC;
+    std::array<Vector4, 9> pointsClip;
+    std::array<Vector3, 9> points{
+        center + Vector3(s, s, s),
+        center + Vector3(s, s, -s),
+        center + Vector3(-s, s, -s),
+        center + Vector3(-s, s, s),
+        center + Vector3(-s, -s, s),
+        center + Vector3(s, -s, s),
+        center + Vector3(s, -s, -s),
+        center + Vector3(-s, -s, -s),
+        center
     };
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < 9; ++i)
     {
-        points[i] = screenProjectionViewMatrix * points[i];
+        pointsV[i] = viewMatrix * points[i];
+        pointsNDC[i] = projectionMatrix * HomoVector(pointsV[i]);
+        // Perspective divide    
+        points[i] = ProjectToHyperspace(pointsNDC[i]);
+        points[i] = viewportMatrix * points[i];
     }
+
+    // Render
     ColorRGB c = Color::White;
     m_pRenderer->DrawLine(points[0], points[1], c);
     m_pRenderer->DrawLine(points[1], points[2], c);
@@ -105,8 +116,7 @@ void Game::DrawReferenceCube (Vector3 const& position, float const s)
     m_pRenderer->DrawLine(points[0], points[5], c);
     m_pRenderer->DrawLine(points[1], points[6], c);
     m_pRenderer->DrawLine(points[2], points[7], c);
-
-    m_pRenderer->SetPixel(center.x, center.y, c);
+    m_pRenderer->SetPixel(points[8].x, points[8].y, c);
 }
 
 int Game::Run ()
@@ -116,8 +126,8 @@ int Game::Run ()
     // Setup camera
     m_camera.Fov(Constants::Deg2Rad(90));
     m_camera.Aspect(m_screenWidth/m_screenHeight);
-    m_camera.Near(1.f);
-    m_camera.Far(100.f);    
+    m_camera.Near(0.1f);
+    m_camera.Far(100.f);
     m_camera.LookAt(Vector3(0, 0, 2)); // TODO: Z can't be 0 for some reason..figure that out
 
     // Add objects to scene
@@ -268,25 +278,23 @@ bool Game::ProcessEvents ()
 
 void Game::UpdateViewportMatrix ()
 {
-    // Convert from [-1, 1] to [0, 1], then scale by screen dimensions    
+    // x, y -> Convert from [-1, 1] to [0, 1], then scale by screen dimensions    
+    // z -> leave as-is
     float v_x = 0.5f * m_screenWidth, v_y = 0.5f * m_screenHeight;
     m_viewportMatrix = Matrix4(Matrix4::elements_array_type{
        v_x,   0, 0, v_x, 
          0, v_y, 0, v_y, 
-         0,   0, 1,   0,  // TODO: This is incomplete....need to transform to NDC CUBE, NOT rectangle...see https://github.com/ssloy/tinyrenderer/wiki/Lesson-5-Moving-the-camera#viewport
+         0,   0, 1,   0,
          0,   0, 0,   1, 
     });
 }
 
 void Game::DrawWorld (float dt)
 {
-    ResetZBuffer();
- 
-    Matrix4 const& screenProjectionViewMatrix = m_viewportMatrix * m_camera.ProjectionViewMatrix();
+    ResetZBuffer();    
 
     Matrix4 const& projectionViewMatrix = m_camera.ProjectionViewMatrix();
-
-    float minZ = 200.f;
+    Matrix4 const& viewportMatrix = m_viewportMatrix;
     
     for (auto&& obj : m_objects)
     {
@@ -303,22 +311,21 @@ void Game::DrawWorld (float dt)
             // Back-face culling                        
             if (Dot(m_camera.LookAtDirection(), surfaceNormal) >= 0) continue;
             
-            Matrix4 screenProjectionViewModelMatrix = screenProjectionViewMatrix * obj->ModelMatrix();
+            // Transform from model space all the way to NDC clip space
+            Matrix4 projectionViewModelMatrix = projectionViewMatrix * obj->ModelMatrix();
+            Vector4 v0_homo = projectionViewModelMatrix * HomoVector(face[0].xyz());
+            Vector4 v1_homo = projectionViewModelMatrix * HomoVector(face[1].xyz());
+            Vector4 v2_homo = projectionViewModelMatrix * HomoVector(face[2].xyz());
 
-            // Apply perspective projection, transform to screen space while maintaining z-coordinate and also taking care of the perspective divide
-            // TODO: I don't think this is working correctly....Z values after perspective projection are always greater than 1, instead of being between -1 and 1...the z-buffer technically works so the transformation is doing _something_ right but this isn't good enough because I need the range to be -1 to 1 in order to do clipping later on
-            Vector3 v0_NDC = projectionViewMatrix * face[0].xyz();
-            Vector3 v1_NDC = projectionViewMatrix * face[1].xyz();
-            Vector3 v2_NDC = projectionViewMatrix * face[2].xyz();
-            // Vector3 v0 = m_viewportMatrix * v0_NDC;
-            // Vector3 v1 = m_viewportMatrix * v1_NDC;
-            // Vector3 v2 = m_viewportMatrix * v2_NDC;
-            // Vector3 _v0 = screenProjectionViewModelMatrix * face[0].xyz();
-            // Vector3 _v1 = screenProjectionViewModelMatrix * face[1].xyz();
-            // Vector3 _v2 = screenProjectionViewModelMatrix * face[2].xyz();
-            Vector3 v0 = screenProjectionViewModelMatrix * face[0].xyz();
-            Vector3 v1 = screenProjectionViewModelMatrix * face[1].xyz();
-            Vector3 v2 = screenProjectionViewModelMatrix * face[2].xyz();
+            // Perspective divide
+            Vector3 v0_ndc = ProjectToHyperspace(v0_homo);
+            Vector3 v1_ndc = ProjectToHyperspace(v1_homo);
+            Vector3 v2_ndc = ProjectToHyperspace(v2_homo);
+
+            // Transform to screen space while maintaining z-coordinate for depth buffer
+            Vector3 v0 = viewportMatrix * v0_ndc;
+            Vector3 v1 = viewportMatrix * v1_ndc;
+            Vector3 v2 = viewportMatrix * v2_ndc;
             
             // Compute minimum rectangle that fully contains the 3 vertices in screen space
             auto const boundingBox = TriangleUtil::MinimumBoundingBox<float>(v0, v1, v2)
@@ -368,13 +375,17 @@ void Game::DrawWorld (float dt)
                         {
                             // Interpolate z-buffer
                             float z = l0 * v0.z + l1 * v1.z + l2 * v2.z;
+
+                            // TODO: This "clipping" has no performance benefits at this phase; it should be done in clip space
+                            if (z < -1 || z > 1) continue;
+
+                            // Depth test: vertices closest to the near-plane pass, with -1 = near-plane, 1 = far-plane
                             uint index = y * m_screenWidth + x;
-                            if (z >= m_zBuffer[index])
+                            if (z <= m_zBuffer[index])
                             {
                                 m_zBuffer[index] = z;
                                 m_pRenderer->SetPixel(x, y, intensifiedColor);
-                            }
-                            if (z < minZ) minZ = z;
+                            }                            
                         }   
                     }
                 }
@@ -385,7 +396,4 @@ void Game::DrawWorld (float dt)
     // DrawReferenceCube();
 
     m_pRenderer->RenderFrame();
-
-    std::cout << "largest z buffer value is " << *std::max_element(m_zBuffer.begin(), m_zBuffer.end()) << std::endl;
-    std::cout << "smallest z buffer value is " << minZ << std::endl;
 }

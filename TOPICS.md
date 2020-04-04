@@ -53,8 +53,8 @@ This serves as a high-level TODO list, in no particular order.
 - Axis-aligned bounding box (AABB)
 - Camera
    - View frustum culling
-- Projections
-   - Perspective
+- Triangle clipping
+- Projections   
    - Orthographic
    - Axonometric
       - Isometric
