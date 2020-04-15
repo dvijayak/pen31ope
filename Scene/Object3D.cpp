@@ -20,7 +20,21 @@ void Object3D::Translate (Vector3 const& translation)
 
 void Object3D::Rotate (float const x, float const y, float const z)
 {
+   // Note that this is a rotation about the object's origin.
+   // Here is the order of transformations to accomplish this:
+   // 1. Translate to origin
+   // 2. Apply rotation about the point (0, 0, 0)
+   // 3. Translate back to object's world position
+
+   float t_x = m_modelMatrix(0,3), t_y = m_modelMatrix(1,3), t_z = m_modelMatrix(2,3);
+
    ModelMatrix(
+      Matrix4(Matrix4::elements_array_type{
+         1, 0, 0, t_x,
+         0, 1, 0, t_y,
+         0, 0, 1, t_z,
+         0, 0, 0, 1
+      }) *
       Matrix4(Matrix4::elements_array_type{
          1, 0, 0, 0,
          0, cosf(x), -sinf(x), 0,
@@ -39,5 +53,11 @@ void Object3D::Rotate (float const x, float const y, float const z)
          0, 0, 1, 0,
          0, 0, 0, 1
       }) * 
+      Matrix4(Matrix4::elements_array_type{
+         1, 0, 0, -t_x,
+         0, 1, 0, -t_y,
+         0, 0, 1, -t_z,
+         0, 0, 0, 1
+      }) *
       m_modelMatrix);
 }

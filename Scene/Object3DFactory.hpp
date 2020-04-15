@@ -9,6 +9,7 @@
 
 #include "ITextureLoader.hpp"
 
+// TODO: To inherit from IObject3DFactory
 class Object3DFactory
 {
    std::unordered_map<uint, std::unique_ptr<Object3D>> m_objectMap;

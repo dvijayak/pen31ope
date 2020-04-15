@@ -13,6 +13,7 @@ class Material
 
 public:
    TextureMap const* DiffuseMap () const { return m_diffuseMap.get(); }
+   void DiffuseMap (std::unique_ptr<TextureMap> diffuseMap) { m_diffuseMap = std::move(diffuseMap); }
 };
 
 #endif

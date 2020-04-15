@@ -24,7 +24,9 @@ _ = {
       },
       {
          mesh = "models/african_head.obj",
-         diffuse = "models/african_head_diffuse.obj",
+         material = {
+            diffuse = "models/african_head_diffuse.tga",
+         },
          transform = {
             position = {2, 0, 0},
             rotation = {0, 0, 0}

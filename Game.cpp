@@ -27,6 +27,8 @@
 
 #include "ICameraFactory.hpp"
 #include "LuaCameraFactory.hpp"
+#include "IObject3DFactory.hpp"
+#include "LuaObject3DFactory.hpp"
 
 constexpr uint MAX_FPS = 240;
 constexpr uint MIN_FPS = 15;
@@ -35,14 +37,7 @@ Game::Game ()
     : m_targetFrameRate(60)
     , m_fixedUpdateTimeStep(1000/m_targetFrameRate)
     , m_pRenderer(0)
-{
-    std::unique_ptr<ICameraFactory> pCameraFactory = std::make_unique<LuaCameraFactory>();
-    auto pCamera = pCameraFactory->MakeFromFile("scene.lua");
-    if (pCamera)
-    {
-        m_camera = *pCamera;
-    }
-}
+{}
 
 Game::~Game ()
 {
@@ -129,11 +124,23 @@ void Game::DrawReferenceCube (Vector3 const& center, float const s)
 }
 
 int Game::Run ()
-{    
+{   
+    //// Load Scene ////
+
+    std::unique_ptr<ICameraFactory> pCameraFactory = std::make_unique<LuaCameraFactory>();
+    auto pCamera = pCameraFactory->MakeFromFile("scene.lua");
+    if (pCamera)
+    {
+        m_camera = *pCamera;
+    }
+
+    std::unique_ptr<IObject3DFactory> pObjectFactory = std::make_unique<LuaObject3DFactory>();
+    m_objects = std::move(pObjectFactory->MakeFromFile("scene.lua"));
+    
     //// Create some test objects ////
 
     // Add objects to scene
-    m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
+    // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/african_head.obj", "models/african_head_diffuse.tga"));
     // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/diablo_pose.obj", "models/diablo_pose_diffuse.tga"));    
     // m_objects.push_back(m_objectFactory.MakeTexturedObject("models/cube2.obj"));
     // m_objects[0]->Translate(Vector3(-0.5f, 0, 0));
@@ -244,7 +251,7 @@ bool Game::ProcessEvents ()
                     float movement = 0.1f;
                     movement *= event.key.keysym.sym == SDLK_LEFT ? 1 : (event.key.keysym.sym == SDLK_RIGHT ? -1 : 0);
                     // m_camera.Move(Vector3::Left * movement);
-                    m_objects[0]->Rotate(0, -movement, 0);
+                    m_objects[0].Rotate(0, -movement, 0);
                 }
 
                 if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_DOWN)
@@ -300,11 +307,9 @@ void Game::DrawWorld (float dt)
     
     for (auto&& obj : m_objects)
     {
-        if (!obj) continue;
+        Matrix4 const modelMatrixInverseTranspose = ~obj.ModelMatrixInverse();
 
-        Matrix4 const modelMatrixInverseTranspose = ~obj->ModelMatrixInverse();
-
-        for (auto const& face : obj->Mesh()->GetFaces())
+        for (auto const& face : obj.Mesh()->GetFaces())
         {
             // Transform surface normals and compute intensity     
             Vector3 surfaceNormal = TransformDirection(modelMatrixInverseTranspose, face.Normal()); // assumes transformation results in unit vector
@@ -314,7 +319,7 @@ void Game::DrawWorld (float dt)
             if (Dot(m_camera.LookAtDirection(), surfaceNormal) >= 0) continue;
             
             // Transform from model space all the way to NDC clip space
-            Matrix4 projectionViewModelMatrix = projectionViewMatrix * obj->ModelMatrix();
+            Matrix4 projectionViewModelMatrix = projectionViewMatrix * obj.ModelMatrix();
             Vector4 v0_homo = projectionViewModelMatrix * HomoVector(face[0].xyz());
             Vector4 v1_homo = projectionViewModelMatrix * HomoVector(face[1].xyz());
             Vector4 v2_homo = projectionViewModelMatrix * HomoVector(face[2].xyz());
@@ -352,7 +357,7 @@ void Game::DrawWorld (float dt)
                         float v_interpolated = l0 * uv0.y + l1 * uv1.y + l2 * uv2.y;
 
                         // Get color from diffuse map
-                        ColorRGB diffuseColor = obj->Material() && obj->Material()->DiffuseMap() ? obj->Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : face.DebugColor();
+                        ColorRGB diffuseColor = obj.Material() && obj.Material()->DiffuseMap() ? obj.Material()->DiffuseMap()->Map(u_interpolated, v_interpolated) : face.DebugColor();
 
                         // Gouraud shading: interpolate normal and compute lighting intensity
                         // Assumes transformation results in unit vector

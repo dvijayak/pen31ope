@@ -48,6 +48,7 @@ private:
     */
    Object3D () {}
    friend class Object3DFactory;
+   friend class LuaObject3DFactory;
 
 public:
    uint Id () const { return m_id; }
@@ -70,6 +71,7 @@ public:
    void Translate (Vector3 const& translation);
 
    /**
+    * Rotate's the object **about its center, i.e. model-space origin**.
     * Specify euler angles, in radians
     */
    void Rotate (float const x, float const y, float const z);

@@ -8,6 +8,7 @@
 #include "IRenderer.hpp"
 #include "Vector.hpp"
 #include "Matrix.hpp"
+#include "Object3D.hpp"
 #include "Object3DFactory.hpp"
 #include "Camera.hpp"
 
@@ -67,7 +68,7 @@ private:
     std::vector<float> m_zBuffer;
 
     Object3DFactory m_objectFactory;
-    std::vector<Object3D*> m_objects;
+    std::vector<Object3D> m_objects;
     std::vector<Vector3> m_lights;
 
     Camera m_camera;

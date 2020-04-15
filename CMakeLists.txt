@@ -36,6 +36,7 @@ add_executable(pen31ope
     Scene/Object3D.cpp
     Scene/Object3DFactory.cpp
     Scene/LuaCameraFactory.cpp
+    Scene/LuaObject3DFactory.cpp
     Settings/LuaAppSettingsFactory.cpp
     )
 target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${LUA_LIBRARIES})
