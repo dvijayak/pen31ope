@@ -24,7 +24,7 @@
 - Texture mapping
 - Barycentric coordinates
    - Triangle rasterizing
-   - Z-buffer
+   - Z-buffer interpolation
 - Templated math library for applicable elements
    - Vectors
    - Matrics
@@ -85,6 +85,7 @@ This serves as a high-level TODO list, in no particular order.
    - Hard
    - Soft
 - Ambient Occlusion
+- Skybox
 - GUI
    - Slider
    - Dropdown menu

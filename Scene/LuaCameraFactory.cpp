@@ -1,5 +1,7 @@
 #include "LuaCameraFactory.hpp"
 
+#include "LuaVector.hpp"
+
 #include "Camera.hpp"
 #include "Constants.hpp"
 
@@ -34,15 +36,15 @@ std::unique_ptr<Camera> LuaCameraFactory::MakeFromFile (std::string const& filen
 
    // TODO: Implement proper transform for Camera so that its positioning + orientation works just like Object3D
    Vector3 newPosition;
-   sol::optional<std::vector<float>> position = config["transform"]["position"];
+   sol::optional<std::array<float, 3>> position = config["transform"]["position"];
    if (position)
    {
       auto & v = position.value();
       newPosition = Vector3(v[0], v[1], v[2]);
    }
 
-   sol::optional<std::vector<float>> lookAt = config["look_at"]["at"];
-   sol::optional<std::vector<float>> up = config["look_at"]["up"];
+   sol::optional<std::array<float, 3>> lookAt = config["look_at"]["at"];
+   sol::optional<std::array<float, 3>> up = config["look_at"]["up"];
    if (lookAt && up)
    {
       auto & v_at = lookAt.value();

@@ -85,7 +85,8 @@
         "memory_resource": "cpp",
         "cassert": "cpp",
         "forward_list": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "__functional_03": "cpp"
     },
     "cmake.configureOnOpen": false,
     "Lua.diagnostics.globals": [

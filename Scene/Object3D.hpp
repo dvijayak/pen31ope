@@ -68,13 +68,21 @@ public:
    Matrix4 const& ModelMatrix () const { return m_modelMatrix; }
    Matrix4 const& ModelMatrixInverse () const { return m_modelMatrixInverse; }
 
-   void Translate (Vector3 const& translation);
+   void Translate (float const x, float const y, float const z);
+   inline void Translate (Vector3 const& translation)
+   {
+      Translate(translation[0], translation[1], translation[2]);
+   }
 
    /**
     * Rotate's the object **about its center, i.e. model-space origin**.
     * Specify euler angles, in radians
     */
    void Rotate (float const x, float const y, float const z);
+   inline void Rotate (Vector3 const& euler)
+   {
+      Rotate(euler[0], euler[1], euler[2]);
+   }
 };
 
 #endif

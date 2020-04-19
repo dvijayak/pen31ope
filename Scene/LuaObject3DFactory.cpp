@@ -82,17 +82,14 @@ std::vector<Object3D> LuaObject3DFactory::MakeFromFile (std::string const& filen
       auto transform = element["transform"];
       if (transform.valid())
       {
-         // TODO: Write direct converter from Lua state  stack to Vector3...cf. https://sol2.readthedocs.io/en/latest/tutorial/customization.html
-         Vector3 newPosition;
-         sol::optional<std::vector<float>> position = transform["position"];
+         sol::optional<std::array<float, 3>> position = transform["position"];
          if (position)
          {
             auto & v = position.value();
-            newPosition = Vector3(v[0], v[1], v[2]);
-            object.Translate(newPosition);
+            object.Translate(v[0], v[1], v[2]);
          }
 
-         sol::optional<std::vector<float>> rotation = transform["rotation"];
+         sol::optional<std::array<float, 3>> rotation = transform["rotation"];
          if (rotation)
          {
             auto & v = rotation.value();

@@ -8,12 +8,12 @@ void Object3D::ModelMatrix (Matrix4 const& m)
    m_modelMatrixInverse = Inverse_RotationTranslation(m_modelMatrix); // TODO: Will break once we start supporting scaling.
 }
 
-void Object3D::Translate (Vector3 const& translation)
+void Object3D::Translate (float const x, float const y, float const z)
 {
    ModelMatrix(m_modelMatrix + Matrix4(Matrix4::elements_array_type{
-      0, 0, 0, translation.x,
-      0, 0, 0, translation.y,
-      0, 0, 0, translation.z,
+      0, 0, 0, x,
+      0, 0, 0, y,
+      0, 0, 0, z,
       0, 0, 0, 0
    }));
 }
