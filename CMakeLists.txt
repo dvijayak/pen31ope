@@ -8,6 +8,12 @@ message(STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 set (CMAKE_CXX_STANDARD 17)
 
+# Set platform/architecture by default to be x64 ('cause 32-bit is too ol' skool)
+if(NOT CMAKE_GENERATOR_PLATFORM)
+    set(CMAKE_GENERATOR_PLATFORM x64)
+endif()
+message("Platform/Architecture = ${CMAKE_GENERATOR_PLATFORM}")
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeMods/")
 find_package(SDL2 REQUIRED)
 find_package(SDL2_Image REQUIRED)

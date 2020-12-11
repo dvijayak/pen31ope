@@ -69,8 +69,7 @@ int main (int argc, char** argv)
 
         // Configuration
         game.SetRenderer(pSDL.get());
-        game.SetScreenWidth(settings.screenWidth);
-        game.SetScreenHeight(settings.screenHeight);
+        game.SetScreenWidthAndHeight(settings.screenWidth, settings.screenHeight);        
 
         // Go!
         rc = game.Run();

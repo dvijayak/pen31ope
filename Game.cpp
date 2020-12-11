@@ -44,6 +44,16 @@ Game::~Game ()
     // Destroy relevant singletons/managers
 }
 
+void Game::SetScreenWidthAndHeight (float const width, float const height)
+{
+    m_screenWidth = width;
+    m_screenHeight = height;
+
+    m_camera.Aspect(m_screenWidth/m_screenHeight);
+    UpdateViewportMatrix();
+    RecreateZBuffer();
+}
+
 void Game::SetScreenWidth (float const width)
 {
     m_screenWidth = width;

@@ -36,6 +36,7 @@ public:
 
     void SetRenderer (IRenderer* pRM) { m_pRenderer = pRM; }
 
+    void SetScreenWidthAndHeight (float width, float height); // it is important to call this at least once before either SetScreenWidth or SetScreenHeight are called
     void SetScreenWidth (float width);
     void SetScreenHeight (float height);
 
