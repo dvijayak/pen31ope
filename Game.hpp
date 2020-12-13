@@ -5,7 +5,8 @@
 #include <utility> // for std::pair
 #include <vector>
 
-#include "IRenderer.hpp"
+#include "SDLRenderer.hpp"
+#include "SDLTextFactory.hpp"
 #include "Vector.hpp"
 #include "Matrix.hpp"
 #include "Object3D.hpp"
@@ -34,7 +35,8 @@ public:
      */
     int Run ();
 
-    void SetRenderer (IRenderer* pRM) { m_pRenderer = pRM; }
+    void SetRenderer (SDLRenderer* pRM) { m_pRenderer = pRM; }
+    void SetTextRenderer (SDLTextFactory* pTF) { m_pTF = pTF; }
 
     void SetScreenWidthAndHeight (float width, float height); // it is important to call this at least once before either SetScreenWidth or SetScreenHeight are called
     void SetScreenWidth (float width);
@@ -60,7 +62,8 @@ private:
     size_t m_targetFrameRate; // FPS
     size_t m_fixedUpdateTimeStep; // milliseconds, normally synced to target frame rate
 
-    IRenderer* m_pRenderer; // TODO: Change to unique_ptr?
+    SDLRenderer* m_pRenderer; // TODO: Change to unique_ptr?
+    SDLTextFactory* m_pTF; // TODO: Change to unique_ptr?
 
     // TODO: these should update as the window is resized. I should probably implement
     // the Observer pattern in due time...

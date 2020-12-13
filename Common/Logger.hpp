@@ -21,4 +21,4 @@
 // #define trclog spdlog::get("trclog")->info
 // #define errlog spdlog::get("errlog")->error
 
-#define trclog std::cout << 
+#define trclog(content) std::cout << content << std::endl;

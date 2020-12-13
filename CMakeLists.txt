@@ -17,6 +17,7 @@ message("Platform/Architecture = ${CMAKE_GENERATOR_PLATFORM}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeMods/")
 find_package(SDL2 REQUIRED)
 find_package(SDL2_Image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 find_package(Lua REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
@@ -34,6 +35,7 @@ add_executable(pen31ope
     Game.cpp
     Common/Chrono.cpp
     Core/SDLRenderer.cpp
+    Core/SDLTextFactory.cpp
     Geometry/Mesh.cpp
     Geometry/SDLTextureLoader.cpp
     Lua/LuaContext.cpp
@@ -45,10 +47,11 @@ add_executable(pen31ope
     Scene/LuaObject3DFactory.cpp
     Settings/LuaAppSettingsFactory.cpp
     )
-target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${LUA_LIBRARIES})
+target_link_libraries(pen31ope ${SDL2_LIBS} ${SDL2_Image_LIBS} ${SDL2_ttf_LIBS} ${LUA_LIBRARIES})
 
 # Assets
 file(COPY models DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY fonts  DESTINATION ${CMAKE_BINARY_DIR})
 
 # Scripts
 file(GLOB GAME_SCRIPTS scripts/*)
@@ -67,7 +70,7 @@ endif()
 # Copy various DLLs to output folder on Windows
 # Thanks to https://github.com/preshing/CMakeDemo/blob/master/CMakeLists.txt#L21
 if(WIN32)
-    foreach(DLL ${SDL2_DLLS} ${SDL2_Image_DLLS} ${LUA_DLLS})
+    foreach(DLL ${SDL2_DLLS} ${SDL2_Image_DLLS} ${SDL2_ttf_DLLS} ${LUA_DLLS})
         add_custom_command(TARGET pen31ope POST_BUILD COMMAND
             ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:pen31ope>)
     endforeach()

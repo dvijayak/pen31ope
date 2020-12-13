@@ -7,6 +7,7 @@
 
 #define SDL_MAIN_HANDLED
 #include "SDLRenderer.hpp"
+#include "SDLTextFactory.hpp"
 
 #include "Logger.hpp"
 #include "Game.hpp"
@@ -56,6 +57,12 @@ int main (int argc, char** argv)
     std::unique_ptr<SDLRenderer> pSDL = std::make_unique<SDLRenderer>(); // resources are freed at the end via RAII
     pSDL->Initialize(argv[0], settings.screenWidth, settings.screenHeight);
 
+    // Setup text rendering
+    // std::unique_ptr<SDLTextFactory> pTextFactory = std::make_unique<SDLTextFactory>(pSDL->GetRenderer());
+    // pTextFactory->Initialize();
+    SDLTextFactory textFactory(pSDL->GetRenderer());
+    textFactory.Initialize();
+
     // Inititalize RNGs
     // srand(time(nullptr));
     srand(0xff12ffcc);
@@ -69,6 +76,8 @@ int main (int argc, char** argv)
 
         // Configuration
         game.SetRenderer(pSDL.get());
+        // game.SetTextRenderer(pTextFactory.get());
+        game.SetTextRenderer(&textFactory);
         game.SetScreenWidthAndHeight(settings.screenWidth, settings.screenHeight);        
 
         // Go!

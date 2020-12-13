@@ -82,7 +82,7 @@ void SDLRenderer::Initialize (std::string windowTitle, uint width, uint height, 
     int sdlImgInitResult = IMG_Init(sdlImgFlags);
     if ((sdlImgInitResult & sdlImgFlags) != sdlImgFlags)
     {
-        trclog("\tFailed to initialize PNG and JPG image support. IMG_Init error: ") << IMG_GetError();
+        trclog("\tFailed to initialize PNG and JPG image support. IMG_Init error: " << IMG_GetError());
         // TODO: Set a flag so that renderer does not do things that require PNG/JPG support
     }
 

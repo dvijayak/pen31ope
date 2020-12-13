@@ -199,8 +199,26 @@ int Game::Run ()
             lag -= m_fixedUpdateTimeStep;
         }
 
-        // Render the game using the normalized lag
+        // Render the scene using the normalized lag
         DrawWorld(float(lag)/float(m_fixedUpdateTimeStep));
+        // Submit the frame
+        m_pRenderer->RenderFrame();
+        // Render all UI text on top of the scene
+        if (m_pTF != nullptr)
+        {
+            size_t fps = 1.f / (float(elapsed) / 1000.f);
+            std::stringstream ss;
+            ss << elapsed << " ms (" << fps << " FPS)";
+            auto pTexture = m_pTF->DrawTextNormal(ss.str(), 16, Color::Orange);
+            if (pTexture->get() != nullptr)
+            {
+                int w, h;
+                SDL_QueryTexture(pTexture->get(), nullptr, nullptr, &w, &h);
+                SDL_Rect dstrect = {0, 0, w, h};
+                SDL_RenderCopy(m_pRenderer->GetRenderer(), pTexture->get(), nullptr, &dstrect); // blit the whole text on the top-left corner of the screen
+                SDL_RenderPresent(m_pRenderer->GetRenderer());
+            }
+        }
 
         #ifdef NDEBUG
         // Consider sleeping a bit after a cycle to save power/energy on the host platform
@@ -411,6 +429,4 @@ void Game::DrawWorld (float dt)
     }
 
     // DrawReferenceCube();
-
-    m_pRenderer->RenderFrame();
 }

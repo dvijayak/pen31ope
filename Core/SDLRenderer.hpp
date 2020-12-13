@@ -33,6 +33,9 @@ public:
     void DrawLine (Vector3 const& from, Vector3 const& to, ColorRGB color) override;
     void DrawTriangle (Vector3 const& v0, Vector3 const& v1, Vector3 const& v2, ColorRGB color) override;
 
+    /// SDL-specific
+    SDL_Renderer* GetRenderer() const { return m_pRenderer; }
+
 private:
     /**
      * This function can be called in order to transform an existing frame that
