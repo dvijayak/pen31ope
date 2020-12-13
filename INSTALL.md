@@ -25,6 +25,21 @@ SDL2 version 2.0.10 is already version-controlled in this repo, so nothing furth
 
 #### TODO: SDL2_Image
 
+### Get LuaJIT
+
+LuaJIT binaries are already version-controlled but just in case you need to do this again, here are the steps.
+
+1. Download the latest stable release ZIP of LuaJIT from [the website](https://luajit.org/download.html). At the time of writing, the version used was [2.0.5](https://luajit.org/download/LuaJIT-2.0.5.zip).
+2. Extract the archive and open `src/msvcbuilt.bat` in your favourite text editor.
+3. Append `/DLUAJIT_ENABLE_LUA52COMPAT` to the `@set LJCOMPILE=` line.
+4. Open up a tools-enabled cmd prompt targeting either x86 or x64 in the `src` folder and run `msvcbuild.bat`.
+  - For a 32-bit build (x86), use the "x64_x86 Cross Tools Command Prompt for Visual Studio" cmd prompt.
+  - For a 64-bit build (x64), use the "x64 Native Tools Command Prompt for Visual Studio" cmd prompt.
+5. Copy the lua51.dll, lua51.lib and lua51.exp files to `3rdParty/lua/Windows/lib/x64` folder (do the corresponding step for x86).
+6. Copy the lua.h, lualib.h, lauxlib.h, luajit.h files to `3rdParty/lua/Windows/include`.
+
+You should be good to go.
+
 ### Build & Run
 
 From the project root, run: `cmake -B build`. If you want to use a specific MSVC IDE version, do `cmake -B build -G <VS Version>`, for example for VS 2017, `cmake -B build -G "Visual Studio 15 2017"`.

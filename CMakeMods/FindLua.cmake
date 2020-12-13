@@ -5,6 +5,7 @@
 #  LUA_EXECUTABLE, if found
 #  LUA_FOUND, if false, do not try to link to Lua 
 #  LUA_LIBRARIES
+#  LUA_DLLS, for Windows only
 #  LUA_INCLUDE_DIR, where to find lua.h
 #  LUA_VERSION_STRING, the version of Lua found (since CMake 2.8.8)
 #
@@ -33,12 +34,7 @@
 # standard syntax, e.g. FIND_PACKAGE(Lua 5.1)
 # Otherwise the module will search for any available Lua implementation
 
-### TODO: WIN32
-
-# Always search for non-versioned lua first (recommended)
-SET(_POSSIBLE_LUA_INCLUDE include include/lua)
-SET(_POSSIBLE_LUA_EXECUTABLE lua)
-SET(_POSSIBLE_LUA_LIBRARY lua)
+INCLUDE(FindPackageHandleStandardArgs)
 
 # Determine possible naming suffixes (there is no standard for this)
 IF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
@@ -47,50 +43,75 @@ ELSE(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
   SET(_POSSIBLE_SUFFIXES "52" "5.2" "-5.2" "51" "5.1" "-5.1")
 ENDIF(Lua_FIND_VERSION_MAJOR AND Lua_FIND_VERSION_MINOR)
 
-# Set up possible search names and locations
-FOREACH(_SUFFIX ${_POSSIBLE_SUFFIXES})
-  LIST(APPEND _POSSIBLE_LUA_INCLUDE "include/lua${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_LUA_EXECUTABLE "lua${_SUFFIX}")
-  LIST(APPEND _POSSIBLE_LUA_LIBRARY "lua${_SUFFIX}")
-ENDFOREACH(_SUFFIX)
+IF(WIN32)
+  # Search for Lua in 3rdParty/lua/Windows
+  FIND_PATH(LUA_ROOT "include/lua.h" PATHS "${CMAKE_CURRENT_LIST_DIR}/../3rdParty/lua/Windows" NO_DEFAULT_PATH)
+  IF(LUA_ROOT)
+    SET(LUA_INCLUDE_DIR "${LUA_ROOT}/include")
+    IF(LUA_ROOT)
+      SET(LUA_INCLUDE_DIR "${LUA_ROOT}/include")
+      IF("${CMAKE_GENERATOR}" MATCHES "Win32" OR "${CMAKE_GENERATOR_PLATFORM}" MATCHES "x86" OR "${CMAKE_GENERATOR_PLATFORM}" MATCHES "Win32")
+          set(LUA_LIBRARIES "${LUA_ROOT}/lib/x86/lua51.lib") # Yeah, for expediency I'm just going to explicitly look for this version, screw being generic
+          set(LUA_DLLS "${LUA_ROOT}/lib/x86/lua51.dll")
+      else()
+          set(LUA_LIBRARIES "${LUA_ROOT}/lib/x64/lua51.lib")
+          set(LUA_DLLS "${LUA_ROOT}/lib/x64/lua51.dll")
+      ENDIF()
+    ENDIF()
+  ENDIF()
 
-# Find the lua executable
-FIND_PROGRAM(LUA_EXECUTABLE
-  NAMES ${_POSSIBLE_LUA_EXECUTABLE}
-)
+  MARK_AS_ADVANCED(LUA_ROOT)
+ELSE()
+  # Always search for non-versioned lua first (recommended)
+  SET(_POSSIBLE_LUA_INCLUDE include include/lua)
+  SET(_POSSIBLE_LUA_EXECUTABLE lua)
+  SET(_POSSIBLE_LUA_LIBRARY lua)
 
-# Find the lua header
-FIND_PATH(LUA_INCLUDE_DIR lua.h
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-)
+  # Set up possible search names and locations
+  FOREACH(_SUFFIX ${_POSSIBLE_SUFFIXES})
+    LIST(APPEND _POSSIBLE_LUA_INCLUDE "include/lua${_SUFFIX}")
+    LIST(APPEND _POSSIBLE_LUA_EXECUTABLE "lua${_SUFFIX}")
+    LIST(APPEND _POSSIBLE_LUA_LIBRARY "lua${_SUFFIX}")
+  ENDFOREACH(_SUFFIX)
 
-# Find the lua library
-FIND_LIBRARY(LUA_LIBRARY 
-  NAMES ${_POSSIBLE_LUA_LIBRARY}
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
+  # Find the lua executable
+  FIND_PROGRAM(LUA_EXECUTABLE
+    NAMES ${_POSSIBLE_LUA_EXECUTABLE}
+  )
+
+  # Find the lua header
+  FIND_PATH(LUA_INCLUDE_DIR lua.h
+    HINTS
+    $ENV{LUA_DIR}
+    PATH_SUFFIXES ${_POSSIBLE_LUA_INCLUDE}
+    PATHS
+    ~/Library/Frameworks
+    /Library/Frameworks
+    /usr/local
+    /usr
+    /sw # Fink
+    /opt/local # DarwinPorts
+    /opt/csw # Blastwave
+    /opt
+  )
+
+  # Find the lua library
+  FIND_LIBRARY(LUA_LIBRARY 
+    NAMES ${_POSSIBLE_LUA_LIBRARY}
+    HINTS
+    $ENV{LUA_DIR}
+    PATH_SUFFIXES lib64 lib
+    PATHS
+    ~/Library/Frameworks
+    /Library/Frameworks
+    /usr/local
+    /usr
+    /sw
+    /opt/local
+    /opt/csw
+    /opt
+  )
+ENDIF()
 
 IF(LUA_LIBRARY)
   # include the math library for Unix
@@ -111,7 +132,6 @@ IF(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
   UNSET(lua_version_str)
 ENDIF()
 
-INCLUDE(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
 # all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua

@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 
-#include "sol/sol.hpp"
+#include "LuaCommon.hpp"
 
 /**
  * Every instance of LuaContext has its own state/scope.

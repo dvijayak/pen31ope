@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "sol/sol.hpp"
+#include "LuaCommon.hpp"
 
 template <typename Numeric, uint N, typename Handler>
 bool sol_lua_check(sol::types<Vector<Numeric, N>>, lua_State * L, int index, Handler && handler, sol::stack::record & tracking) {
